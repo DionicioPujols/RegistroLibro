@@ -4,11 +4,12 @@ using RegistroLibro.Context;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var ConStr = builder.Configuration.GetConnectionString("ConStr");
-builder.Services.AddDbContext<Contexto>(option => option.UseSqlite(ConStr));
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+var ConStr = builder.Configuration.GetConnectionString("ConStr");
+builder.Services.AddDbContext<Contexto>(option => option.UseSqlite(ConStr));
 
 var app = builder.Build();
 
