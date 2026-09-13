@@ -1,0 +1,99 @@
+﻿@page "/Libro/Index"
+@page "/"
+@inject GestionLibros gestionLibros
+
+<PageTitle>Registro de Libros</PageTitle>
+
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header d-flex justify-content-between align-center mb-4">
+            <h5 class="card-title">Registro de Libros</h5>
+            <a href="/Libro/Create" class="btn btn-primary"> <span class="bi bi-plus-square mt-3"></span> Crear</a>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Filtrar por</strong></label>
+                </div>
+                <div class="col-4">
+                    <label class="col-form-label"><strong>B&uacute;squeda</strong></label>
+                </div>
+            </div>
+
+            <div class="row align-items-center">
+                <div class="col-3">
+                    <InputSelect class="form-select" @bind-Value="Filtro">
+                        <option value="" selected disabled>Elija una opci&oacute;n</option>
+                        <option value="Titulo">Título</option>
+                        <option value="Autor">Autor</option>
+                    </InputSelect>
+                </div>
+                <div class="col-4">
+                    <div class="input-group">
+                        <input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
+                        <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+                    </div>
+                </div>
+            </div>
+
+            <table class="table table-hover mt-3">
+                <thead class="table table-striped text-black">
+                    <tr>
+                        <th>LibroId</th>
+                        <th>Título</th>
+                        <th>Autor</th>
+                        <th>Año de Publicación</th>
+                        <th>Opciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var libro in ListaLibros)
+                    {
+                        <tr>
+                            <td> @libro.LibroId</td>
+                            <td> @libro.Titulo</td>
+                            <td> @libro.Autor</td>
+                            <td> @libro.anoPublicacion</td>
+                            <td class="text-center">
+                                <a href="/Libro/Edit/@libro.LibroId" class="btn btn-outline-primary"><i class="bi bi-pencil-square"></i></a>
+                                <a href="/Libro/Delete/@libro.LibroId" class="btn btn-outline-danger ms-2"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer d-flex justify-content-between align-center">
+            <label>Cantidad:  @ListaLibros.Count()</label>
+        </div>
+    </div>
+</div>
+
+@code {
+    public List<Libros> ListaLibros { get; set; } = new List<Libros>();
+    public string Filtro { get; set; } = string.Empty;
+    public string ValorFiltro { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaLibros = await gestionLibros.GetList(p => p.LibroId > 0);
+    }
+
+    private async Task Buscar()
+    {
+        if (ValorFiltro.Trim() != "")
+        {
+            if (Filtro == "Titulo")
+            {
+                ListaLibros = await gestionLibros.GetList(p => p.Titulo!.ToLower().Contains(ValorFiltro.ToLower()));
+            }
+            else if (Filtro == "Autor")
+            {
+                ListaLibros = await gestionLibros.GetList(p => p.Autor!.ToLower().Contains(ValorFiltro.ToLower()));
+            }
+        }
+        else
+            ListaLibros = await gestionLibros.GetList(p => p.LibroId > 0);
+    }
+}

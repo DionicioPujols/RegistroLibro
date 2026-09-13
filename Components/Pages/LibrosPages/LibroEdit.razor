@@ -1,0 +1,87 @@
+﻿@page "/Libro/Edit/{LibroId:int}"
+@inject GestionLibros gestionLibros
+@inject NavigationManager navigationManager
+
+<PageTitle>Modificar Libro</PageTitle>
+
+<EditForm Model="Libro" OnValidSubmit="Modificar">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h5 class="card-title">Modificar Libro</h5>
+            </div>
+
+            @* Título *@
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label"><strong>Título</strong></label>
+                    <InputText class="form-control" @bind-Value="Libro.Titulo"></InputText>
+                    <ValidationMessage For="(() => Libro.Titulo)" />
+                </div>
+
+                @* Autor *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Autor</strong></label>
+                    <InputText class="form-control" @bind-Value="Libro.Autor"></InputText>
+                    <ValidationMessage For="(() => Libro.Autor)" />
+                </div>
+
+                @* Año de Publicación *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Año de Publicación</strong></label>
+                    <InputNumber class="form-control" @bind-Value="Libro.anoPublicacion"></InputNumber>
+                    <ValidationMessage For="(() => Libro.anoPublicacion)" />
+                </div>
+            </div>
+
+            @* Botones de Acción *@
+            <div class="card-footer text-center mt-2">
+                <a href="/Libro/Index" class="btn btn-secondary">
+                    <span class="bi bi-arrow-left"></span> Volver
+                </a>
+                <button type="submit" class="btn btn-primary bi bi-floppy"> Modificar</button>
+                <a href="/Libro/Delete/@Libro.LibroId" class="btn btn-danger bi bi-trash"> Eliminar</a>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int LibroId { get; set; }
+
+    public Libros Libro { get; set; } = new Libros();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Libro = await gestionLibros.Buscar(LibroId) ?? new Libros();
+    }
+
+    public async Task Modificar()
+    {
+        Libro.Titulo = Libro.Titulo?.Trim();
+
+        var tituloExiste = await gestionLibros.GetList(l => l.Titulo!.ToLower() == Libro.Titulo!.ToLower() && l.LibroId != Libro.LibroId);
+
+        if (tituloExiste.Any())
+        {
+            toastService.ShowError("Ya existe otro libro registrado con este título.");
+            return;
+        }
+
+        var modificado = await gestionLibros.Guardar(Libro);
+
+        if (modificado)
+        {
+            toastService.ShowSuccess("Se ha modificado correctamente.");
+            navigationManager.NavigateTo("/Libro/Index");
+        }
+        else
+        {
+            toastService.ShowError("No se ha podido modificar correctamente.");
+        }
+    }
+}

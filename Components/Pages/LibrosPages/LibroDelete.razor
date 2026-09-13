@@ -1,0 +1,56 @@
+﻿@page "/Libro/Delete/{LibroId:int}"
+@inject GestionLibros gestionLibros
+@inject NavigationManager navigationManager
+
+<PageTitle>Eliminar Libro</PageTitle>
+
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header text-center">
+            <h5 class="card-title">¿Estás seguro de que deseas eliminar este libro?</h5>
+        </div>
+
+        @* Detalles del Libro a Eliminar *@
+        <div class="card-body text-center">
+            <p><strong>LibroId:</strong> @Libro.LibroId</p>
+            <p><strong>Título:</strong> @Libro.Titulo</p>
+            <p><strong>Autor:</strong> @Libro.Autor</p>
+            <p><strong>Año de Publicación:</strong> @Libro.anoPublicacion</p>
+        </div>
+
+        @* Botones de Acción *@
+        <div class="card-footer text-center mt-2">
+            <a href="/Libro/Index" class="btn btn-secondary">
+                <span class="bi bi-arrow-left"></span> Volver
+            </a>
+            <button type="button" class="btn btn-danger bi bi-trash" @onclick="Eliminar"> Eliminar</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int LibroId { get; set; }
+
+    public Libros Libro { get; set; } = new Libros();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Libro = await gestionLibros.Buscar(LibroId) ?? new Libros();
+    }
+
+    private async Task Eliminar()
+    {
+        var eliminado = await gestionLibros.Eliminar(Libro.LibroId);
+
+        if (eliminado)
+        {
+            toastService.ShowSuccess("Se ha eliminado correctamente.");
+            navigationManager.NavigateTo("/Libro/Index");
+        }
+        else
+        {
+            toastService.ShowError("No se ha podido eliminar correctamente.");
+        }
+    }
+}
