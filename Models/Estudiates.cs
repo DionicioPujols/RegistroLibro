@@ -19,7 +19,7 @@ namespace RegistroLibro.Models
 
         [Required(ErrorMessage = "La fecha de nacimeinto es obligatorio")]
         [DataType(DataType.Date)]
-        public DateTime FechaNacimeinto { get; set; } = DateTime.Today
+        public DateTime FechaNacimeinto { get; set; } = DateTime.Today;
 
     }
 }
