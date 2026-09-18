@@ -1,0 +1,101 @@
+﻿@page "/Estudiante/Index"
+@page "/"
+@inject EstudiantesSerivices estudiantesService
+
+<PageTitle>Registro de Estudiantes</PageTitle>
+
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header d-flex justify-content-between align-center mb-4">
+            <h5 class="card-title">Registro de Estudiantes</h5>
+            <a href="/Estudiante/Create" class="btn btn-primary"><i class="bi bi-plus-square"></i> Crear</a>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Filtrar por</strong></label>
+                </div>
+                <div class="col-4">
+                    <label class="col-form-label"><strong>Busqueda</strong></label>
+                </div>
+            </div>
+
+            <div class="row align-items-center">
+                <div class="col-3">
+                    <InputSelect class="form-select" @bind-Value="Filtro">
+                        <option value="" selected disabled>Elija una opcion</option>
+                        <option value="Nombre">Nombre</option>
+                        <option value="Direccion">Dirección</option>
+                    </InputSelect>
+                </div>
+                <div class="col-4">
+                    <div class="input-group">
+                        <input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
+                        <button type="button" class="btn btn-outline-primary" @onclick="Buscar"><i class="bi bi-search"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <table class="table table-hover mt-3">
+                <thead class="table table-striped text-black">
+                    <tr>
+                        <th>EstudianteId</th>
+                        <th>Nombre</th>
+                        <th>Dirección</th>
+                        <th>Correo</th>
+                        <th>Fecha de Nac.</th>
+                        <th>Opciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var estudiante in ListaEstudiantes)
+                    {
+                        <tr>
+                            <td> @estudiante.EstudiantesID</td>
+                            <td> @estudiante.nombre</td>
+                            <td> @estudiante.Direccion</td>
+                            <td> @estudiante.Correo</td>
+                            <td> @estudiante.FechaNacimeinto.ToShortDateString()</td>
+                            <td class="text-center">
+                                <a href="/Estudiante/Edit/@estudiante.EstudiantesID" class="btn btn-outline-primary"><i class="bi bi-pencil-square"></i></a>
+                                <a href="/Estudiante/Delete/@estudiante.EstudiantesID" class="btn btn-outline-danger ms-2"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer d-flex justify-content-between align-center">
+            <label>Cantidad:  @ListaEstudiantes.Count()</label>
+        </div>
+    </div>
+</div>
+
+@code {
+    public List<Estudiates> ListaEstudiantes { get; set; } = new List<Estudiates>();
+    public string Filtro { get; set; } = string.Empty;
+    public string ValorFiltro { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaEstudiantes = await estudiantesService.GetList(p => p.EstudiantesID > 0);
+    }
+
+    private async Task Buscar()
+    {
+        if (ValorFiltro.Trim() != "")
+        {
+            if (Filtro == "Nombre")
+            {
+                ListaEstudiantes = await estudiantesService.GetList(p => p.nombre!.ToLower().Contains(ValorFiltro.ToLower()));
+            }
+            else if (Filtro == "Direccion")
+            {
+                ListaEstudiantes = await estudiantesService.GetList(p => p.Direccion!.ToLower().Contains(ValorFiltro.ToLower()));
+            }
+        }
+        else
+            ListaEstudiantes = await estudiantesService.GetList(p => p.EstudiantesID > 0);
+    }
+}
