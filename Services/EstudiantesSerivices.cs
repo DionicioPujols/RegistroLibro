@@ -10,7 +10,7 @@ using System.Security.Cryptography.Xml;
 namespace RegistroLibro.Services
 {
     public class EstudiantesSerivices(IDbContextFactory<Contexto>
-        dbContext) : Aplicada1.Core.IService<Estudiates, int>
+        dbContext) : Aplicada1.Core.IService<Estudiantes, int>
     {
 
         private async Task<bool> Existe(int estudianteId)
@@ -20,7 +20,7 @@ namespace RegistroLibro.Services
             .AllAsync(e => e.EstudiantesID == estudianteId);
         }
 
-        private async Task<bool> Insetar(Estudiates estudiates)
+        private async Task<bool> Insetar(Estudiantes estudiates)
         {
             await using var contexto = await dbContext.CreateDbContextAsync();
             contexto.Estudiates.Add(estudiates);
@@ -28,7 +28,7 @@ namespace RegistroLibro.Services
                 .SaveChangesAsync() > 0;
         }
 
-        private async Task<bool> Modificar(Estudiates estudiates)
+        private async Task<bool> Modificar(Estudiantes estudiates)
         {
             await using var contexto = await dbContext.CreateDbContextAsync();
             contexto.Estudiates.Update(estudiates);
@@ -36,7 +36,7 @@ namespace RegistroLibro.Services
                 .SaveChangesAsync() > 0;
         }
 
-        public async Task<Estudiates?> Buscar(int id) 
+        public async Task<Estudiantes?> Buscar(int id) 
         {
             await using var contexto = await dbContext.CreateDbContextAsync();
             return await contexto.Estudiates
@@ -51,7 +51,7 @@ namespace RegistroLibro.Services
                 .ExecuteDeleteAsync() > 0;
         }
 
-        public async Task<List<Estudiates>> GetList(Expression<Func<Estudiates, bool>> criterio)
+        public async Task<List<Estudiantes>> GetList(Expression<Func<Estudiantes, bool>> criterio)
         {
             await using var contexto = await dbContext.CreateDbContextAsync();
             return await contexto.Estudiates
@@ -60,7 +60,7 @@ namespace RegistroLibro.Services
                 .ToListAsync();
         }
 
-        public async Task<bool> Guardar(Estudiates estudiates)
+        public async Task<bool> Guardar(Estudiantes estudiates)
         {
             if(!await Existe(estudiates.EstudiantesID))
             {

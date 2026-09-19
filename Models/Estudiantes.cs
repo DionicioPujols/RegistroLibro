@@ -3,7 +3,7 @@ using System.Resources;
 
 namespace RegistroLibro.Models
 {
-    public class Estudiates
+    public class Estudiantes
     {
         [Key]
         public int EstudiantesID { get; set; }

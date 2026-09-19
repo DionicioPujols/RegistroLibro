@@ -1,0 +1,57 @@
+﻿@page "/Estudiante/Delete/{EstudiantesID:int}"
+@inject EstudiantesSerivices estudiantesService
+@inject NavigationManager navigationManager
+
+<PageTitle>Eliminar Estudiante</PageTitle>
+
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header text-center">
+            <h5 class="card-title">¿Estás seguro de que deseas eliminar este estudiante?</h5>
+        </div>
+
+        @* Detalles del Estudiante a Eliminar *@
+        <div class="card-body text-center">
+            <p><strong>EstudianteId:</strong> @Estudiante.EstudiantesID</p>
+            <p><strong>Nombre:</strong> @Estudiante.nombre</p>
+            <p><strong>Dirección:</strong> @Estudiante.Direccion</p>
+            <p><strong>Correo:</strong> @Estudiante.Correo</p>
+            <p><strong>Fecha de Nacimiento:</strong> @Estudiante.FechaNacimeinto.ToShortDateString()</p>
+        </div>
+
+        @* Botones de Acción *@
+        <div class="card-footer text-center mt-2">
+            <a href="/Estudiante/Index" class="btn btn-secondary">
+                <span class="bi bi-arrow-left"></span> Volver
+            </a>
+            <button type="button" class="btn btn-danger bi bi-trash" @onclick="Eliminar"> Eliminar</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int EstudiantesID { get; set; }
+
+    public Estudiates Estudiante { get; set; } = new Estudiates();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Estudiante = await estudiantesService.Buscar(EstudiantesID) ?? new Estudiates();
+    }
+
+    private async Task Eliminar()
+    {
+        var eliminado = await estudiantesService.Eliminar(Estudiante.EstudiantesID);
+
+        if (eliminado)
+        {
+            toastService.ShowSuccess("Se ha eliminado correctamente.");
+            navigationManager.NavigateTo("/Estudiante/Index");
+        }
+        else
+        {
+            toastService.ShowError("No se ha podido eliminar correctamente.");
+        }
+    }
+}
