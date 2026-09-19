@@ -33,11 +33,11 @@
     [Parameter]
     public int EstudiantesID { get; set; }
 
-    public Estudiates Estudiante { get; set; } = new Estudiates();
+    public Estudiantes Estudiante { get; set; } = new Estudiantes();
 
     protected override async Task OnInitializedAsync()
     {
-        Estudiante = await estudiantesService.Buscar(EstudiantesID) ?? new Estudiates();
+        Estudiante = await estudiantesService.Buscar(EstudiantesID) ?? new Estudiantes();
     }
 
     private async Task Eliminar()
