@@ -1,0 +1,94 @@
+﻿@page "/Estudiante/Edit/{EstudiantesID:int}"
+@inject EstudiantesSerivices estudiantesService
+@inject NavigationManager navigationManager
+
+<PageTitle>Modificar Estudiante</PageTitle>
+
+<EditForm Model="Estudiante" OnValidSubmit="Modificar">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h5 class="card-title">Modificar Estudiante</h5>
+            </div>
+
+            <div class="card-body">
+                @* Nombre *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Nombre</strong></label>
+                    <InputText class="form-control" @bind-Value="Estudiante.nombre"></InputText>
+                    <ValidationMessage For="(() => Estudiante.nombre)" />
+                </div>
+
+                @* Dirección *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Dirección</strong></label>
+                    <InputText class="form-control" @bind-Value="Estudiante.Direccion"></InputText>
+                    <ValidationMessage For="(() => Estudiante.Direccion)" />
+                </div>
+
+                @* Correo Electrónico *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Correo Electrónico</strong></label>
+                    <InputText class="form-control" @bind-Value="Estudiante.Correo"></InputText>
+                    <ValidationMessage For="(() => Estudiante.Correo)" />
+                </div>
+
+                @* Fecha de Nacimiento *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Fecha de Nacimiento</strong></label>
+                    <InputDate class="form-control" @bind-Value="Estudiante.FechaNacimeinto"></InputDate>
+                    <ValidationMessage For="(() => Estudiante.FechaNacimeinto)" />
+                </div>
+            </div>
+
+            @* Botones de Acción *@
+            <div class="card-footer text-center mt-2">
+                <a href="/Estudiante/Index" class="btn btn-secondary">
+                    <span class="bi bi-arrow-left"></span> Volver
+                </a>
+                <button type="submit" class="btn btn-primary bi bi-floppy"> Modificar</button>
+                <a href="/Estudiante/Delete/@Estudiante.EstudiantesID" class="btn btn-danger bi bi-trash"> Eliminar</a>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int EstudiantesID { get; set; }
+
+    public Estudiates Estudiante { get; set; } = new Estudiates();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Estudiante = await estudiantesService.Buscar(EstudiantesID) ?? new Estudiates();
+    }
+
+    public async Task Modificar()
+    {
+        Estudiante.nombre = Estudiante.nombre?.Trim();
+
+        var nombreExiste = await estudiantesService.GetList(e => e.nombre!.ToLower() == Estudiante.nombre!.ToLower() && e.EstudiantesID != Estudiante.EstudiantesID);
+
+        if (nombreExiste.Any())
+        {
+            toastService.ShowError("Ya existe otro estudiante registrado con este nombre.");
+            return;
+        }
+
+        var modificado = await estudiantesService.Guardar(Estudiante);
+
+        if (modificado)
+        {
+            toastService.ShowSuccess("Se ha modificado correctamente.");
+            navigationManager.NavigateTo("/Estudiante/Index");
+        }
+        else
+        {
+            toastService.ShowError("No se ha podido modificar correctamente.");
+        }
+    }
+}
