@@ -10,11 +10,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-var ConStr = builder.Configuration.GetConnectionString("ConStr");
+var ConStr = builder.Configuration.GetConnectionString("SqlConStr");
 
 builder.Services.AddDbContextFactory<Contexto>(options =>
-    options.UseSqlite(ConStr));
+    options.UseSqlServer(ConStr));
 
+builder.Services.AddScoped<EstudiantesSerivices>();
 builder.Services.AddScoped<GestionLibros>();
 
 builder.Services.AddBlazorBootstrap();
