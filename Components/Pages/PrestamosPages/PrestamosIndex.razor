@@ -36,37 +36,25 @@
                 </div>
             </div>
 
-            <table class="table table-hover mt-3">
-                <thead class="table table-striped text-black">
-                    <tr>
-                        <th>PrestamoId</th>
-                        <th>Fecha</th>
-                        <th>Estudiante</th>
-                        <th>Libro</th>
-                        <th>Devuelto</th>
-                        <th>Opciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var prestamo in ListaPrestamos)
-                    {
-                        <tr>
-                            <td> @prestamo.PrestamoId</td>
-                            <td> @prestamo.Fecha.ToShortDateString()</td>
-                            <td> @prestamo.Estudiante?.nombre</td>
-                            <td> @prestamo.Libro?.Titulo</td>
-                            <td> @(prestamo.Devuelto ? "Sí" : "No")</td>
-                            <td class="text-center">
-                                <a href="/Prestamo/Edit/@prestamo.PrestamoId" class="btn btn-outline-primary"><i class="bi bi-pencil-square"></i></a>
-                                <button type="button" class="btn btn-outline-danger ms-2" @onclick="() => OnShowModalClick(prestamo.PrestamoId)"><i class="bi bi-trash"></i></button>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+            <div class="grid">
+                <QuickGrid Items="@prestamosQueryable" Pagination="@pagination" Class="table table-hover mt-3 table-striped">
+                    <PropertyColumn Property="@(p => p.PrestamoId)" Title="PrestamoId" Sortable="true" />
+                    <PropertyColumn Property="@(p => p.Fecha)" Title="Fecha" Format="d" Sortable="true" />
+                    <TemplateColumn Title="Estudiante">@context.Estudiante?.nombre</TemplateColumn>
+                    <TemplateColumn Title="Libro">@context.Libro?.Titulo</TemplateColumn>
+                    <TemplateColumn Title="Devuelto">
+                        @(context.Devuelto ? "Sí" : "No")
+                    </TemplateColumn>
+                    <TemplateColumn Title="Opciones" Align="Align.Center">
+                        <a href="/Prestamo/Edit/@context.PrestamoId" class="btn btn-outline-primary"><i class="bi bi-pencil-square"></i></a>
+                        <button type="button" class="btn btn-outline-danger ms-2" @onclick="() => OnShowModalClick(context.PrestamoId)"><i class="bi bi-trash"></i></button>
+                    </TemplateColumn>
+                </QuickGrid>
+            </div>
         </div>
-        <div class="card-footer d-flex justify-content-between align-center">
-            <label>Cantidad:  @ListaPrestamos.Count()</label>
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <Paginator State="@pagination" />
+            <label class="mb-0">Cantidad:  @ListaPrestamos.Count()</label>
         </div>
     </div>
 </div>
@@ -83,8 +71,12 @@
 
 @code {
     public List<Prestamos> ListaPrestamos { get; set; } = new List<Prestamos>();
+    IQueryable<Prestamos>? prestamosQueryable;
+
     public string Filtro { get; set; } = string.Empty;
     public string ValorFiltro { get; set; } = string.Empty;
+
+    private PaginationState pagination = new PaginationState { ItemsPerPage = 5 };
 
     private Modal modal = default!;
     private int prestamoIdToDelete;
@@ -92,6 +84,7 @@
     protected override async Task OnInitializedAsync()
     {
         ListaPrestamos = await prestamosService.GetList(p => p.PrestamoId > 0);
+        prestamosQueryable = ListaPrestamos.AsQueryable();
     }
 
     private async Task Buscar()
@@ -109,6 +102,8 @@
         }
         else
             ListaPrestamos = await prestamosService.GetList(p => p.PrestamoId > 0);
+            
+        prestamosQueryable = ListaPrestamos.AsQueryable();
     }
 
     private async Task OnShowModalClick(int id)
@@ -129,6 +124,7 @@
         {
             toastService.ShowSuccess("Préstamo eliminado correctamente.");
             ListaPrestamos = await prestamosService.GetList(p => p.PrestamoId > 0);
+            prestamosQueryable = ListaPrestamos.AsQueryable();
         }
         else
         {
