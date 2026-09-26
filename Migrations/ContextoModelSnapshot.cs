@@ -22,7 +22,7 @@ namespace RegistroLibro.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("RegistroLibro.Models.Estudiates", b =>
+            modelBuilder.Entity("RegistroLibro.Models.Estudiantes", b =>
                 {
                     b.Property<int>("EstudiantesID")
                         .ValueGeneratedOnAdd()
@@ -37,15 +37,6 @@ namespace RegistroLibro.Migrations
                     b.Property<string>("Direccion")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("FechaNacimeinto")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("nombre")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("EstudiantesID");
 
                     b.Property<DateTime>("FechaNacimeinto")
                         .HasColumnType("datetime2");

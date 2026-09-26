@@ -12,8 +12,8 @@ using RegistroLibro.Context;
 namespace RegistroLibro.Migrations
 {
     [DbContext(typeof(Contexto))]
-    [Migration("20260918131620_RegistroEstudiante")]
-    partial class RegistroEstudiante
+    [Migration("20260926145634_Inicial")]
+    partial class Inicial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace RegistroLibro.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("RegistroLibro.Models.Estudiates", b =>
+            modelBuilder.Entity("RegistroLibro.Models.Estudiantes", b =>
                 {
                     b.Property<int>("EstudiantesID")
                         .ValueGeneratedOnAdd()
