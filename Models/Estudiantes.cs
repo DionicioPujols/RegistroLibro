@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Resources;
 
 namespace RegistroLibro.Models
@@ -20,6 +21,9 @@ namespace RegistroLibro.Models
         [Required(ErrorMessage = "La fecha de nacimeinto es obligatorio")]
         [DataType(DataType.Date)]
         public DateTime FechaNacimeinto { get; set; } = DateTime.Today;
+
+        [InverseProperty("Estudiante")]
+        public virtual ICollection<Prestamos> Prestamos { get; set; } = new List<Prestamos>();
 
     }
 }
