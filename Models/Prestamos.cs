@@ -13,7 +13,10 @@ namespace RegistroLibro.Models
 
         [Required(ErrorMessage = "Debe seleccionar un estudiante")]
         public int EstudiantesID { get; set; }
-        
+
+        [InverseProperty("Prestamo")]
+        public virtual ICollection<PrestamosDetalle> PrestamosDetalle { get; set; } = new List<PrestamosDetalle>();
+
         [ForeignKey("EstudiantesID")]
         [InverseProperty("Prestamos")]
         public virtual Estudiantes Estudiante { get; set; } = null!;
