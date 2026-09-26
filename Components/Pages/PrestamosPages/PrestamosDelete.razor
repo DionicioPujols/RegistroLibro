@@ -1,0 +1,63 @@
+@page "/Prestamo/Delete/{id:int}"
+@inject PrestamosServices prestamosService
+@inject NavigationManager navigationManager
+
+<PageTitle>Eliminar Préstamo</PageTitle>
+
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header text-center">
+            <h5 class="card-title">Eliminar Préstamo</h5>
+        </div>
+
+        <div class="card-body">
+            @if (Prestamo != null)
+            {
+                <div class="mb-3">
+                    <p><strong>ID Préstamo:</strong> @Prestamo.PrestamoId</p>
+                    <p><strong>Estudiante:</strong> @Prestamo.Estudiante?.nombre</p>
+                    <p><strong>Libro:</strong> @Prestamo.Libro?.Titulo</p>
+                    <p><strong>Fecha:</strong> @Prestamo.Fecha.ToShortDateString()</p>
+                    <p><strong>Devuelto:</strong> @(Prestamo.Devuelto ? "Sí" : "No")</p>
+                </div>
+                
+                <p class="text-danger">¿Está seguro de que desea eliminar este préstamo?</p>
+            }
+            else
+            {
+                <p>Cargando información del préstamo...</p>
+            }
+        </div>
+
+        <div class="card-footer text-center mt-2">
+            <a href="/Prestamo/Index" class="btn btn-secondary"> <span class="bi bi-arrow-left"></span> Cancelar</a>
+            <button class="btn btn-danger bi bi-trash" @onclick="Eliminar"> Eliminar</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    public Prestamos? Prestamo { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Prestamo = await prestamosService.Buscar(id);
+    }
+
+    public async Task Eliminar()
+    {
+        var eliminado = await prestamosService.Eliminar(id);
+        if (eliminado)
+        {
+            toastService.ShowSuccess("Préstamo eliminado correctamente.");
+            navigationManager.NavigateTo("/Prestamo/Index");
+        }
+        else
+        {
+            toastService.ShowError("No se pudo eliminar el préstamo.");
+        }
+    }
+}

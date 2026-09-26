@@ -1,0 +1,105 @@
+@page "/Prestamo/Create"
+@inject PrestamosServices prestamosService
+@inject EstudiantesSerivices estudiantesService
+@inject GestionLibros librosService
+@inject NavigationManager navigationManager
+
+<PageTitle>Crear Préstamo</PageTitle>
+
+<EditForm Model="Prestamo" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h5 class="card-title">Crear Préstamo</h5>
+            </div>
+
+            <div class="card-body">
+                @* Fecha *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Fecha</strong></label>
+                    <InputDate class="form-control" @bind-Value="Prestamo.Fecha"></InputDate>
+                    <ValidationMessage For="(() => Prestamo.Fecha)" />
+                </div>
+
+                @* Libro *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Libro</strong></label>
+                    <InputSelect class="form-select" @bind-Value="Prestamo.LibroId">
+                        <option value="0" selected disabled>Seleccione un libro</option>
+                        @foreach (var libro in ListaLibros)
+                        {
+                            <option value="@libro.LibroId">@libro.Titulo</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="(() => Prestamo.LibroId)" />
+                </div>
+
+                @* Estudiante *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Estudiante</strong></label>
+                    <InputSelect class="form-select" @bind-Value="Prestamo.EstudiantesID">
+                        <option value="0" selected disabled>Seleccione un estudiante</option>
+                        @foreach (var estudiante in ListaEstudiantes)
+                        {
+                            <option value="@estudiante.EstudiantesID">@estudiante.nombre</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="(() => Prestamo.EstudiantesID)" />
+                </div>
+
+                @* Devuelto *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Devuelto</strong></label>
+                    <InputCheckbox @bind-Value="Prestamo.Devuelto" class="form-check-input ms-2"></InputCheckbox>
+                    <ValidationMessage For="(() => Prestamo.Devuelto)" />
+                </div>
+            </div>
+
+            @* Botones de Acción *@
+            <div class="card-footer text-center mt-2">
+                <a href="/Prestamo/Index" class="btn btn-secondary"> <span class="bi bi-arrow-left"></span> Volver</a>
+                <button type="submit" class="btn btn-success bi bi-floppy"> Guardar</button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    public Prestamos Prestamo { get; set; } = new Prestamos();
+    public List<Estudiantes> ListaEstudiantes { get; set; } = new List<Estudiantes>();
+    public List<Libros> ListaLibros { get; set; } = new List<Libros>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaEstudiantes = await estudiantesService.GetList(e => e.EstudiantesID > 0);
+        ListaLibros = await librosService.GetList(l => l.LibroId > 0);
+    }
+
+    public async Task Guardar()
+    {
+        if(Prestamo.EstudiantesID == 0)
+        {
+            toastService.ShowError("Debe seleccionar un estudiante.");
+            return;
+        }
+
+        if(Prestamo.LibroId == 0)
+        {
+            toastService.ShowError("Debe seleccionar un libro.");
+            return;
+        }
+
+        var creado = await prestamosService.Guardar(Prestamo);
+        if (creado)
+        {
+            toastService.ShowSuccess("Préstamo guardado correctamente.");
+            navigationManager.NavigateTo("/Prestamo/Index");
+        }
+        else
+        {
+            toastService.ShowError("No se pudo guardar el préstamo.");
+        }
+    }
+}

@@ -1,0 +1,100 @@
+@page "/Prestamo/Index"
+@inject PrestamosServices prestamosService
+
+<PageTitle>Registro de Préstamos</PageTitle>
+
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header d-flex justify-content-between align-center mb-4">
+            <h5 class="card-title">Registro de Préstamos</h5>
+            <a href="/Prestamo/Create" class="btn btn-primary"><i class="bi bi-plus-square"></i> Crear</a>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Filtrar por</strong></label>
+                </div>
+                <div class="col-4">
+                    <label class="col-form-label"><strong>Búsqueda</strong></label>
+                </div>
+            </div>
+
+            <div class="row align-items-center">
+                <div class="col-3">
+                    <InputSelect class="form-select" @bind-Value="Filtro">
+                        <option value="" selected disabled>Elija una opción</option>
+                        <option value="ID">ID</option>
+                        <option value="Estudiante">Estudiante</option>
+                    </InputSelect>
+                </div>
+                <div class="col-4">
+                    <div class="input-group">
+                        <input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
+                        <button type="button" class="btn btn-outline-primary" @onclick="Buscar"><i class="bi bi-search"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <table class="table table-hover mt-3">
+                <thead class="table table-striped text-black">
+                    <tr>
+                        <th>PrestamoId</th>
+                        <th>Fecha</th>
+                        <th>Estudiante</th>
+                        <th>Libro</th>
+                        <th>Devuelto</th>
+                        <th>Opciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var prestamo in ListaPrestamos)
+                    {
+                        <tr>
+                            <td> @prestamo.PrestamoId</td>
+                            <td> @prestamo.Fecha.ToShortDateString()</td>
+                            <td> @prestamo.Estudiante?.nombre</td>
+                            <td> @prestamo.Libro?.Titulo</td>
+                            <td> @(prestamo.Devuelto ? "Sí" : "No")</td>
+                            <td class="text-center">
+                                <a href="/Prestamo/Edit/@prestamo.PrestamoId" class="btn btn-outline-primary"><i class="bi bi-pencil-square"></i></a>
+                                <a href="/Prestamo/Delete/@prestamo.PrestamoId" class="btn btn-outline-danger ms-2"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer d-flex justify-content-between align-center">
+            <label>Cantidad:  @ListaPrestamos.Count()</label>
+        </div>
+    </div>
+</div>
+
+@code {
+    public List<Prestamos> ListaPrestamos { get; set; } = new List<Prestamos>();
+    public string Filtro { get; set; } = string.Empty;
+    public string ValorFiltro { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaPrestamos = await prestamosService.GetList(p => p.PrestamoId > 0);
+    }
+
+    private async Task Buscar()
+    {
+        if (ValorFiltro.Trim() != "")
+        {
+            if (Filtro == "ID" && int.TryParse(ValorFiltro, out int id))
+            {
+                ListaPrestamos = await prestamosService.GetList(p => p.PrestamoId == id);
+            }
+            else if (Filtro == "Estudiante")
+            {
+                ListaPrestamos = await prestamosService.GetList(p => p.Estudiante.nombre.ToLower().Contains(ValorFiltro.ToLower()));
+            }
+        }
+        else
+            ListaPrestamos = await prestamosService.GetList(p => p.PrestamoId > 0);
+    }
+}

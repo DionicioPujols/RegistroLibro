@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RegistroLibro.Models
@@ -14,8 +14,13 @@ namespace RegistroLibro.Models
         [Required(ErrorMessage = "Debe seleccionar un estudiante")]
         public int EstudiantesID { get; set; }
 
-        [InverseProperty("Prestamo")]
-        public virtual ICollection<PrestamosDetalle> PrestamosDetalle { get; set; } = new List<PrestamosDetalle>();
+        public bool Devuelto { get; set; } = false;
+
+        [Required(ErrorMessage = "Debe seleccionar un libro")]
+        public int LibroId { get; set; }
+
+        [ForeignKey("LibroId")]
+        public virtual Libros? Libro { get; set; }
 
         [ForeignKey("EstudiantesID")]
         [InverseProperty("Prestamos")]
