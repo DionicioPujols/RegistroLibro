@@ -1,4 +1,4 @@
-﻿@page "/Estudiante/Index"
+@page "/Estudiante/Index"
 @inject EstudiantesSerivices estudiantesService
 
 <PageTitle>Registro de Estudiantes</PageTitle>
@@ -58,7 +58,7 @@
                             <td> @estudiante.FechaNacimeinto.ToShortDateString()</td>
                             <td class="text-center">
                                 <a href="/Estudiante/Edit/@estudiante.EstudiantesID" class="btn btn-outline-primary"><i class="bi bi-pencil-square"></i></a>
-                                <a href="/Estudiante/Delete/@estudiante.EstudiantesID" class="btn btn-outline-danger ms-2"><i class="bi bi-trash"></i></a>
+                                <button type="button" class="btn btn-outline-danger ms-2" @onclick="() => OnShowModalClick(estudiante.EstudiantesID)"><i class="bi bi-trash"></i></button>
                             </td>
                         </tr>
                     }
@@ -71,10 +71,23 @@
     </div>
 </div>
 
+<Modal @ref="modal" Title="Confirmar Eliminación">
+    <BodyTemplate>
+        <p>¿Está seguro de que desea eliminar este estudiante?</p>
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">Cancelar</Button>
+        <Button Color="ButtonColor.Danger" @onclick="EliminarEstudiante">Eliminar</Button>
+    </FooterTemplate>
+</Modal>
+
 @code {
     public List<Estudiantes> ListaEstudiantes { get; set; } = new List<Estudiantes>();
     public string Filtro { get; set; } = string.Empty;
     public string ValorFiltro { get; set; } = string.Empty;
+
+    private Modal modal = default!;
+    private int estudianteIdToDelete;
 
     protected override async Task OnInitializedAsync()
     {
@@ -96,5 +109,31 @@
         }
         else
             ListaEstudiantes = await estudiantesService.GetList(p => p.EstudiantesID > 0);
+    }
+
+    private async Task OnShowModalClick(int id)
+    {
+        estudianteIdToDelete = id;
+        await modal.ShowAsync();
+    }
+
+    private async Task OnHideModalClick()
+    {
+        await modal.HideAsync();
+    }
+
+    private async Task EliminarEstudiante()
+    {
+        var eliminado = await estudiantesService.Eliminar(estudianteIdToDelete);
+        if (eliminado)
+        {
+            toastService.ShowSuccess("Estudiante eliminado correctamente.");
+            ListaEstudiantes = await estudiantesService.GetList(p => p.EstudiantesID > 0);
+        }
+        else
+        {
+            toastService.ShowError("No se pudo eliminar el estudiante.");
+        }
+        await modal.HideAsync();
     }
 }

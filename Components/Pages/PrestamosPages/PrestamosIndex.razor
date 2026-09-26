@@ -58,7 +58,7 @@
                             <td> @(prestamo.Devuelto ? "Sí" : "No")</td>
                             <td class="text-center">
                                 <a href="/Prestamo/Edit/@prestamo.PrestamoId" class="btn btn-outline-primary"><i class="bi bi-pencil-square"></i></a>
-                                <a href="/Prestamo/Delete/@prestamo.PrestamoId" class="btn btn-outline-danger ms-2"><i class="bi bi-trash"></i></a>
+                                <button type="button" class="btn btn-outline-danger ms-2" @onclick="() => OnShowModalClick(prestamo.PrestamoId)"><i class="bi bi-trash"></i></button>
                             </td>
                         </tr>
                     }
@@ -71,10 +71,23 @@
     </div>
 </div>
 
+<Modal @ref="modal" Title="Confirmar Eliminación">
+    <BodyTemplate>
+        <p>¿Está seguro de que desea eliminar este préstamo?</p>
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">Cancelar</Button>
+        <Button Color="ButtonColor.Danger" @onclick="EliminarPrestamo">Eliminar</Button>
+    </FooterTemplate>
+</Modal>
+
 @code {
     public List<Prestamos> ListaPrestamos { get; set; } = new List<Prestamos>();
     public string Filtro { get; set; } = string.Empty;
     public string ValorFiltro { get; set; } = string.Empty;
+
+    private Modal modal = default!;
+    private int prestamoIdToDelete;
 
     protected override async Task OnInitializedAsync()
     {
@@ -96,5 +109,31 @@
         }
         else
             ListaPrestamos = await prestamosService.GetList(p => p.PrestamoId > 0);
+    }
+
+    private async Task OnShowModalClick(int id)
+    {
+        prestamoIdToDelete = id;
+        await modal.ShowAsync();
+    }
+
+    private async Task OnHideModalClick()
+    {
+        await modal.HideAsync();
+    }
+
+    private async Task EliminarPrestamo()
+    {
+        var eliminado = await prestamosService.Eliminar(prestamoIdToDelete);
+        if (eliminado)
+        {
+            toastService.ShowSuccess("Préstamo eliminado correctamente.");
+            ListaPrestamos = await prestamosService.GetList(p => p.PrestamoId > 0);
+        }
+        else
+        {
+            toastService.ShowError("No se pudo eliminar el préstamo.");
+        }
+        await modal.HideAsync();
     }
 }

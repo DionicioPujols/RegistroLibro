@@ -1,4 +1,4 @@
-﻿@page "/Estudiante/Edit/{EstudiantesID:int}"
+@page "/Estudiante/Edit/{EstudiantesID:int}"
 @inject EstudiantesSerivices estudiantesService
 @inject NavigationManager navigationManager
 
@@ -49,18 +49,29 @@
                 <a href="/Estudiante/Index" class="btn btn-secondary">
                     <span class="bi bi-arrow-left"></span> Volver
                 </a>
-                <button type="submit" class="btn btn-primary bi bi-floppy"> Modificar</button>
-                <a href="/Estudiante/Delete/@Estudiante.EstudiantesID" class="btn btn-danger bi bi-trash"> Eliminar</a>
+                <button type="submit" class="btn btn-primary bi bi-floppy ms-2"> Modificar</button>
+                <button type="button" class="btn btn-danger bi bi-trash ms-2" @onclick="OnShowModalClick"> Eliminar</button>
             </div>
         </div>
     </div>
 </EditForm>
+
+<Modal @ref="modal" Title="Confirmar Eliminación">
+    <BodyTemplate>
+        <p>¿Está seguro de que desea eliminar este estudiante?</p>
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">Cancelar</Button>
+        <Button Color="ButtonColor.Danger" @onclick="EliminarEstudiante">Eliminar</Button>
+    </FooterTemplate>
+</Modal>
 
 @code {
     [Parameter]
     public int EstudiantesID { get; set; }
 
     public Estudiantes Estudiante { get; set; } = new Estudiantes();
+    private Modal modal = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -90,5 +101,30 @@
         {
             toastService.ShowError("No se ha podido modificar correctamente.");
         }
+    }
+
+    private async Task OnShowModalClick()
+    {
+        await modal.ShowAsync();
+    }
+
+    private async Task OnHideModalClick()
+    {
+        await modal.HideAsync();
+    }
+
+    private async Task EliminarEstudiante()
+    {
+        var eliminado = await estudiantesService.Eliminar(EstudiantesID);
+        if (eliminado)
+        {
+            toastService.ShowSuccess("Estudiante eliminado correctamente.");
+            navigationManager.NavigateTo("/Estudiante/Index");
+        }
+        else
+        {
+            toastService.ShowError("No se pudo eliminar el estudiante.");
+        }
+        await modal.HideAsync();
     }
 }
