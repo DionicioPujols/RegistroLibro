@@ -1,4 +1,4 @@
-﻿using Azure.Core;
+using Azure.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client.NativeInterop;
 using RegistroLibro.Context;
@@ -16,22 +16,22 @@ namespace RegistroLibro.Services
         private async Task<bool> Existe(int estudianteId)
         {
             await using var contexto = await dbContext.CreateDbContextAsync();
-            return await contexto.Estudiates
+            return await contexto.Estudiantes
             .AllAsync(e => e.EstudiantesID == estudianteId);
         }
 
-        private async Task<bool> Insetar(Estudiantes estudiates)
+        private async Task<bool> Insetar(Estudiantes estudiantes)
         {
             await using var contexto = await dbContext.CreateDbContextAsync();
-            contexto.Estudiates.Add(estudiates);
+            contexto.Estudiantes.Add(estudiantes);
             return await contexto
                 .SaveChangesAsync() > 0;
         }
 
-        private async Task<bool> Modificar(Estudiantes estudiates)
+        private async Task<bool> Modificar(Estudiantes estudiantes)
         {
             await using var contexto = await dbContext.CreateDbContextAsync();
-            contexto.Estudiates.Update(estudiates);
+            contexto.Estudiantes.Update(estudiantes);
             return await contexto
                 .SaveChangesAsync() > 0;
         }
@@ -39,14 +39,14 @@ namespace RegistroLibro.Services
         public async Task<Estudiantes?> Buscar(int id) 
         {
             await using var contexto = await dbContext.CreateDbContextAsync();
-            return await contexto.Estudiates
+            return await contexto.Estudiantes
                 .FirstOrDefaultAsync(e => e.EstudiantesID == id);
         }
 
         public async Task<bool> Eliminar(int id)
         {
             await using var contexto = await dbContext.CreateDbContextAsync();
-            return await contexto.Estudiates
+            return await contexto.Estudiantes
                 .Where(d => d.EstudiantesID == id)
                 .ExecuteDeleteAsync() > 0;
         }
@@ -54,21 +54,21 @@ namespace RegistroLibro.Services
         public async Task<List<Estudiantes>> GetList(Expression<Func<Estudiantes, bool>> criterio)
         {
             await using var contexto = await dbContext.CreateDbContextAsync();
-            return await contexto.Estudiates
+            return await contexto.Estudiantes
                 .Where(criterio)
                 .AsNoTracking()
                 .ToListAsync();
         }
 
-        public async Task<bool> Guardar(Estudiantes estudiates)
+        public async Task<bool> Guardar(Estudiantes estudiantes)
         {
-            if(!await Existe(estudiates.EstudiantesID))
+            if(!await Existe(estudiantes.EstudiantesID))
             {
-                return await Insetar(estudiates);
+                return await Insetar(estudiantes);
             }
             else
             {
-                return await Modificar(estudiates);
+                return await Modificar(estudiantes);
             }
         }
     }

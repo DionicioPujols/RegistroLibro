@@ -47,7 +47,7 @@ namespace RegistroLibro.Migrations
 
                     b.HasKey("EstudiantesID");
 
-                    b.ToTable("Estudiates");
+                    b.ToTable("Estudiantes");
                 });
 
             modelBuilder.Entity("RegistroLibro.Models.Libros", b =>
