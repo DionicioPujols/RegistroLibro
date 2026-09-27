@@ -12,8 +12,8 @@ using RegistroLibro.Context;
 namespace RegistroLibro.Migrations
 {
     [DbContext(typeof(Contexto))]
-    [Migration("20260926181559_AgregarLibroAPrestamos")]
-    partial class AgregarLibroAPrestamos
+    [Migration("20260927233351_Inicial")]
+    partial class Inicial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -50,7 +50,7 @@ namespace RegistroLibro.Migrations
 
                     b.HasKey("EstudiantesID");
 
-                    b.ToTable("Estudiates");
+                    b.ToTable("Estudiantes");
                 });
 
             modelBuilder.Entity("RegistroLibro.Models.Libros", b =>
