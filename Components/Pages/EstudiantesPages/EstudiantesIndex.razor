@@ -1,4 +1,4 @@
-﻿@page "/Estudiante/Index"
+@page "/Estudiante/Index"
 @inject EstudiantesSerivices estudiantesService
 
 <PageTitle>Registro de Estudiantes</PageTitle>
@@ -36,49 +36,50 @@
                 </div>
             </div>
 
-            <table class="table table-hover mt-3">
-                <thead class="table table-striped text-black">
-                    <tr>
-                        <th>EstudianteId</th>
-                        <th>Nombre</th>
-                        <th>Dirección</th>
-                        <th>Correo</th>
-                        <th>Fecha de Nac.</th>
-                        <th>Opciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var estudiante in ListaEstudiantes)
-                    {
-                        <tr>
-                            <td> @estudiante.EstudiantesID</td>
-                            <td> @estudiante.nombre</td>
-                            <td> @estudiante.Direccion</td>
-                            <td> @estudiante.Correo</td>
-                            <td> @estudiante.FechaNacimeinto.ToShortDateString()</td>
-                            <td class="text-center">
-                                <a href="/Estudiante/Edit/@estudiante.EstudiantesID" class="btn btn-outline-primary"><i class="bi bi-pencil-square"></i></a>
-                                <a href="/Estudiante/Delete/@estudiante.EstudiantesID" class="btn btn-outline-danger ms-2"><i class="bi bi-trash"></i></a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+            <div class="grid">
+                <QuickGrid Items="@estudiantesQueryable" Class="table table-hover mt-3 table-striped">
+                    <PropertyColumn Property="@(e => e.EstudiantesID)" Title="EstudianteId" Sortable="true" />
+                    <PropertyColumn Property="@(e => e.nombre)" Title="Nombre" Sortable="true" />
+                    <PropertyColumn Property="@(e => e.Direccion)" Title="Dirección" Sortable="true" />
+                    <PropertyColumn Property="@(e => e.Correo)" Title="Correo" Sortable="true" />
+                    <PropertyColumn Property="@(e => e.FechaNacimeinto)" Title="Fecha de Nac." Format="d" Sortable="true" />
+                    <TemplateColumn Title="Opciones" Align="Align.Center">
+                        <a href="/Estudiante/Edit/@context.EstudiantesID" class="btn btn-outline-primary"><i class="bi bi-pencil-square"></i></a>
+                        <button type="button" class="btn btn-outline-danger ms-2" @onclick="() => OnShowModalClick(context.EstudiantesID)"><i class="bi bi-trash"></i></button>
+                    </TemplateColumn>
+                </QuickGrid>
+            </div>
         </div>
-        <div class="card-footer d-flex justify-content-between align-center">
-            <label>Cantidad:  @ListaEstudiantes.Count()</label>
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <label class="mb-0">Cantidad:  @ListaEstudiantes.Count()</label>
         </div>
     </div>
 </div>
 
+<Modal @ref="modal" Title="Confirmar Eliminación">
+    <BodyTemplate>
+        <p>¿Está seguro de que desea eliminar este estudiante?</p>
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">Cancelar</Button>
+        <Button Color="ButtonColor.Danger" @onclick="EliminarEstudiante">Eliminar</Button>
+    </FooterTemplate>
+</Modal>
+
 @code {
     public List<Estudiantes> ListaEstudiantes { get; set; } = new List<Estudiantes>();
+    IQueryable<Estudiantes>? estudiantesQueryable;
+
     public string Filtro { get; set; } = string.Empty;
     public string ValorFiltro { get; set; } = string.Empty;
+
+    private Modal modal = default!;
+    private int estudianteIdToDelete;
 
     protected override async Task OnInitializedAsync()
     {
         ListaEstudiantes = await estudiantesService.GetList(p => p.EstudiantesID > 0);
+        estudiantesQueryable = ListaEstudiantes.AsQueryable();
     }
 
     private async Task Buscar()
@@ -96,5 +97,34 @@
         }
         else
             ListaEstudiantes = await estudiantesService.GetList(p => p.EstudiantesID > 0);
+            
+        estudiantesQueryable = ListaEstudiantes.AsQueryable();
+    }
+
+    private async Task OnShowModalClick(int id)
+    {
+        estudianteIdToDelete = id;
+        await modal.ShowAsync();
+    }
+
+    private async Task OnHideModalClick()
+    {
+        await modal.HideAsync();
+    }
+
+    private async Task EliminarEstudiante()
+    {
+        var eliminado = await estudiantesService.Eliminar(estudianteIdToDelete);
+        if (eliminado)
+        {
+            toastService.ShowSuccess("Estudiante eliminado correctamente.");
+            ListaEstudiantes = await estudiantesService.GetList(p => p.EstudiantesID > 0);
+            estudiantesQueryable = ListaEstudiantes.AsQueryable();
+        }
+        else
+        {
+            toastService.ShowError("No se pudo eliminar el estudiante.");
+        }
+        await modal.HideAsync();
     }
 }

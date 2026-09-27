@@ -1,4 +1,4 @@
-﻿@page "/Libro/Index"
+@page "/Libro/Index"
 @page "/"
 @inject GestionLibros gestionLibros
 
@@ -37,47 +37,49 @@
                 </div>
             </div>
 
-            <table class="table table-hover mt-3">
-                <thead class="table table-striped text-black">
-                    <tr>
-                        <th>LibroId</th>
-                        <th>Título</th>
-                        <th>Autor</th>
-                        <th>Año de Publicación</th>
-                        <th>Opciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var libro in ListaLibros)
-                    {
-                        <tr>
-                            <td> @libro.LibroId</td>
-                            <td> @libro.Titulo</td>
-                            <td> @libro.Autor</td>
-                            <td> @libro.anoPublicacion</td>
-                            <td class="text-center">
-                                <a href="/Libro/Edit/@libro.LibroId" class="btn btn-outline-primary"><i class="bi bi-pencil-square"></i></a>
-                                <a href="/Libro/Delete/@libro.LibroId" class="btn btn-outline-danger ms-2"><i class="bi bi-trash"></i></a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+            <div class="grid">
+                <QuickGrid Items="@librosQueryable" Class="table table-hover mt-3 table-striped">
+                    <PropertyColumn Property="@(l => l.LibroId)" Title="LibroId" Sortable="true" />
+                    <PropertyColumn Property="@(l => l.Titulo)" Title="Título" Sortable="true" />
+                    <PropertyColumn Property="@(l => l.Autor)" Title="Autor" Sortable="true" />
+                    <PropertyColumn Property="@(l => l.anoPublicacion)" Title="Año de Publicación" Sortable="true" />
+                    <TemplateColumn Title="Opciones" Align="Align.Center">
+                        <a href="/Libro/Edit/@context.LibroId" class="btn btn-outline-primary"><i class="bi bi-pencil-square"></i></a>
+                        <button type="button" class="btn btn-outline-danger ms-2" @onclick="() => OnShowModalClick(context.LibroId)"><i class="bi bi-trash"></i></button>
+                    </TemplateColumn>
+                </QuickGrid>
+            </div>
         </div>
-        <div class="card-footer d-flex justify-content-between align-center">
-            <label>Cantidad:  @ListaLibros.Count()</label>
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <label class="mb-0">Cantidad:  @ListaLibros.Count()</label>
         </div>
     </div>
 </div>
 
+<Modal @ref="modal" Title="Confirmar Eliminación">
+    <BodyTemplate>
+        <p>¿Está seguro de que desea eliminar este libro?</p>
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">Cancelar</Button>
+        <Button Color="ButtonColor.Danger" @onclick="EliminarLibro">Eliminar</Button>
+    </FooterTemplate>
+</Modal>
+
 @code {
     public List<Libros> ListaLibros { get; set; } = new List<Libros>();
+    IQueryable<Libros>? librosQueryable;
+
     public string Filtro { get; set; } = string.Empty;
     public string ValorFiltro { get; set; } = string.Empty;
+
+    private Modal modal = default!;
+    private int libroIdToDelete;
 
     protected override async Task OnInitializedAsync()
     {
         ListaLibros = await gestionLibros.GetList(p => p.LibroId > 0);
+        librosQueryable = ListaLibros.AsQueryable();
     }
 
     private async Task Buscar()
@@ -95,5 +97,34 @@
         }
         else
             ListaLibros = await gestionLibros.GetList(p => p.LibroId > 0);
+            
+        librosQueryable = ListaLibros.AsQueryable();
+    }
+
+    private async Task OnShowModalClick(int id)
+    {
+        libroIdToDelete = id;
+        await modal.ShowAsync();
+    }
+
+    private async Task OnHideModalClick()
+    {
+        await modal.HideAsync();
+    }
+
+    private async Task EliminarLibro()
+    {
+        var eliminado = await gestionLibros.Eliminar(libroIdToDelete);
+        if (eliminado)
+        {
+            toastService.ShowSuccess("Libro eliminado correctamente.");
+            ListaLibros = await gestionLibros.GetList(p => p.LibroId > 0);
+            librosQueryable = ListaLibros.AsQueryable();
+        }
+        else
+        {
+            toastService.ShowError("No se pudo eliminar el libro.");
+        }
+        await modal.HideAsync();
     }
 }

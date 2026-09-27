@@ -1,0 +1,141 @@
+@page "/Prestamo/Edit/{id:int}"
+@inject PrestamosServices prestamosService
+@inject EstudiantesSerivices estudiantesService
+@inject GestionLibros librosService
+@inject NavigationManager navigationManager
+
+<PageTitle>Editar Préstamo</PageTitle>
+
+<EditForm Model="Prestamo" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h5 class="card-title">Editar Préstamo</h5>
+            </div>
+
+            <div class="card-body">
+                @* Fecha *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Fecha</strong></label>
+                    <InputDate class="form-control" @bind-Value="Prestamo.Fecha"></InputDate>
+                    <ValidationMessage For="(() => Prestamo.Fecha)" />
+                </div>
+
+                @* Libro *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Libro</strong></label>
+                    <InputSelect class="form-select" @bind-Value="Prestamo.LibroId">
+                        <option value="0" disabled>Seleccione un libro</option>
+                        @foreach (var libro in ListaLibros)
+                        {
+                            <option value="@libro.LibroId">@libro.Titulo</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="(() => Prestamo.LibroId)" />
+                </div>
+
+                @* Estudiante *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Estudiante</strong></label>
+                    <InputSelect class="form-select" @bind-Value="Prestamo.EstudiantesID">
+                        <option value="0" disabled>Seleccione un estudiante</option>
+                        @foreach (var estudiante in ListaEstudiantes)
+                        {
+                            <option value="@estudiante.EstudiantesID">@estudiante.nombre</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="(() => Prestamo.EstudiantesID)" />
+                </div>
+
+            </div>
+
+            @* Botones de Acción *@
+            <div class="card-footer text-center mt-2">
+                <a href="/Prestamo/Index" class="btn btn-secondary"> <span class="bi bi-arrow-left"></span> Volver</a>
+                <button type="button" class="btn btn-danger ms-2" @onclick="OnShowModalClick"><i class="bi bi-trash"></i> Eliminar</button>
+                <button type="submit" class="btn btn-success ms-2"><i class="bi bi-floppy"></i> Guardar</button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+<Modal @ref="modal" Title="Confirmar Eliminación">
+    <BodyTemplate>
+        <p>¿Está seguro de que desea eliminar este préstamo?</p>
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">Cancelar</Button>
+        <Button Color="ButtonColor.Danger" @onclick="EliminarPrestamo">Eliminar</Button>
+    </FooterTemplate>
+</Modal>
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    public Prestamos Prestamo { get; set; } = new Prestamos();
+    public List<Estudiantes> ListaEstudiantes { get; set; } = new List<Estudiantes>();
+    public List<Libros> ListaLibros { get; set; } = new List<Libros>();
+
+    private Modal modal = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaEstudiantes = await estudiantesService.GetList(e => e.EstudiantesID > 0);
+        ListaLibros = await librosService.GetList(l => l.LibroId > 0);
+        Prestamo = await prestamosService.Buscar(id) ?? new Prestamos();
+    }
+
+    public async Task Guardar()
+    {
+        if(Prestamo.EstudiantesID == 0)
+        {
+            toastService.ShowError("Debe seleccionar un estudiante.");
+            return;
+        }
+
+        if(Prestamo.LibroId == 0)
+        {
+            toastService.ShowError("Debe seleccionar un libro.");
+            return;
+        }
+
+        var modificado = await prestamosService.Guardar(Prestamo);
+        if (modificado)
+        {
+            toastService.ShowSuccess("Préstamo modificado correctamente.");
+            navigationManager.NavigateTo("/Prestamo/Index");
+        }
+        else
+        {
+            toastService.ShowError("No se pudo modificar el préstamo.");
+        }
+    }
+
+    private async Task OnShowModalClick()
+    {
+        await modal.ShowAsync();
+    }
+
+    private async Task OnHideModalClick()
+    {
+        await modal.HideAsync();
+    }
+
+    private async Task EliminarPrestamo()
+    {
+        var eliminado = await prestamosService.Eliminar(id);
+        if (eliminado)
+        {
+            toastService.ShowSuccess("Préstamo eliminado correctamente.");
+            navigationManager.NavigateTo("/Prestamo/Index");
+        }
+        else
+        {
+            toastService.ShowError("No se pudo eliminar el préstamo.");
+        }
+        await modal.HideAsync();
+    }
+}
