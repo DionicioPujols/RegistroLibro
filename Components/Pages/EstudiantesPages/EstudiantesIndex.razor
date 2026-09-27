@@ -37,7 +37,7 @@
             </div>
 
             <div class="grid">
-                <QuickGrid Items="@estudiantesQueryable" Pagination="@pagination" Class="table table-hover mt-3 table-striped">
+                <QuickGrid Items="@estudiantesQueryable" Class="table table-hover mt-3 table-striped">
                     <PropertyColumn Property="@(e => e.EstudiantesID)" Title="EstudianteId" Sortable="true" />
                     <PropertyColumn Property="@(e => e.nombre)" Title="Nombre" Sortable="true" />
                     <PropertyColumn Property="@(e => e.Direccion)" Title="Dirección" Sortable="true" />
@@ -52,7 +52,6 @@
         </div>
         <div class="card-footer d-flex justify-content-between align-items-center">
             <label class="mb-0">Cantidad:  @ListaEstudiantes.Count()</label>
-            <Paginator State="@pagination" />
         </div>
     </div>
 </div>
@@ -73,8 +72,6 @@
 
     public string Filtro { get; set; } = string.Empty;
     public string ValorFiltro { get; set; } = string.Empty;
-
-    private PaginationState pagination = new PaginationState { ItemsPerPage = 5 };
 
     private Modal modal = default!;
     private int estudianteIdToDelete;

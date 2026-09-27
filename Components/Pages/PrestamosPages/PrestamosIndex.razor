@@ -37,7 +37,7 @@
             </div>
 
             <div class="grid">
-                <QuickGrid Items="@prestamosQueryable" Pagination="@pagination" Class="table table-hover mt-3 table-striped">
+                <QuickGrid Items="@prestamosQueryable" Class="table table-hover mt-3 table-striped">
                     <PropertyColumn Property="@(p => p.PrestamoId)" Title="PrestamoId" Sortable="true" />
                     <PropertyColumn Property="@(p => p.Fecha)" Title="Fecha" Format="d" Sortable="true" />
                     <TemplateColumn Title="Estudiante">@context.Estudiante?.nombre</TemplateColumn>
@@ -54,7 +54,6 @@
         </div>
         <div class="card-footer d-flex justify-content-between align-items-center">
             <label class="mb-0">Cantidad:  @ListaPrestamos.Count()</label>
-            <Paginator State="@pagination" />
         </div>
     </div>
 </div>
@@ -75,8 +74,6 @@
 
     public string Filtro { get; set; } = string.Empty;
     public string ValorFiltro { get; set; } = string.Empty;
-
-    private PaginationState pagination = new PaginationState { ItemsPerPage = 5 };
 
     private Modal modal = default!;
     private int prestamoIdToDelete;

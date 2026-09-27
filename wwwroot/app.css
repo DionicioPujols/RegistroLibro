@@ -58,3 +58,22 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+/* Fix height and enable scrolling for QuickGrids */
+.grid {
+    height: 16.5rem;
+    overflow-y: auto;
+}
+
+/* Sticky header while scrolling */
+.grid thead {
+    position: sticky;
+    top: 0;
+    background-color: #eee;
+    z-index: 1; /* Ensure header stays above content */
+}
+
+/* Subtle stripe effect */
+.grid tr:nth-child(even) {
+    background: rgba(255,255,255,0.4);
+}
