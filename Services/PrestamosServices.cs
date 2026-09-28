@@ -12,7 +12,7 @@ namespace RegistroLibro.Services
         public async Task<bool> Existe(int PrestamosId)
         {
             await using var contexto = await dbContext.CreateDbContextAsync();
-            return await contexto.Prestamos.AllAsync(p => p.PrestamoId == PrestamosId);
+            return await contexto.Prestamos.AnyAsync(p => p.PrestamoId == PrestamosId);
         }
 
         public async Task<bool> Insertar(Prestamos prestamos)

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using RegistroLibro.Context;
 using RegistroLibro.Models;
@@ -14,7 +14,7 @@ namespace RegistroLibro.Services
         {
             await using var contexto = await dbContext.CreateDbContextAsync();
             return await contexto.Libros
-                .AllAsync(l => l.LibroId == libroId);
+                .AnyAsync(l => l.LibroId == libroId);
         }
 
         private async Task<bool> Insertar(Libros libro)

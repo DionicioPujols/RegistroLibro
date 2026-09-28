@@ -17,7 +17,7 @@ namespace RegistroLibro.Services
         {
             await using var contexto = await dbContext.CreateDbContextAsync();
             return await contexto.Estudiantes
-            .AllAsync(e => e.EstudiantesID == estudianteId);
+            .AnyAsync(e => e.EstudiantesID == estudianteId);
         }
 
         private async Task<bool> Insetar(Estudiantes estudiantes)
