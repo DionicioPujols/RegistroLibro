@@ -44,11 +44,11 @@ public class EstudiantesService(
             .FirstOrDefaultAsync(e => e.EstudiantesID == EstudianteId);
     }
 
-    public async Task<bool> Eliminar(int id)
+    public async Task<bool> Eliminar(int EstudianteId)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
         return await contexto.Estudiantes
-            .Where(d => d.EstudiantesID == id)
+            .Where(d => d.EstudiantesID == EstudianteId)
             .ExecuteDeleteAsync() > 0;
     }
 
