@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 
 namespace RegistroLibro.Services
 {
-    public class GestionLibros(IDbContextFactory<Contexto> 
+    public class LibrosService(IDbContextFactory<Contexto> 
         dbContext) : Aplicada1.Core.IService<Libros, int>
     {
         private async Task<bool> Existe(int libroId)
