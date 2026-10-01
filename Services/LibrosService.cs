@@ -28,7 +28,7 @@ namespace RegistroLibro.Services
         private async Task<bool> Modificar(Libros libro)
         {
             await using var contexto = await contextFactory.CreateDbContextAsync();
-            contexto.Libros.Update(libro);
+            contexto.Update(libro);
             return await contexto
                 .SaveChangesAsync() > 0;
         }
@@ -67,7 +67,6 @@ namespace RegistroLibro.Services
                 Where(criterio)
                 .AsNoTracking()
                 .ToListAsync();
-        }x
- 
+        }
     }
 }
