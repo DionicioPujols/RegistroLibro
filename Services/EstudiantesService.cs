@@ -9,8 +9,9 @@ using System.Security.Cryptography.Xml;
 
 namespace RegistroLibro.Services;
 
-public class EstudiantesService(IDbContextFactory<Contexto>
-    dbContext) : Aplicada1.Core.IService<Estudiantes, int>
+public class EstudiantesService(
+    IDbContextFactory<Contexto> contextFactory
+    ) : Aplicada1.Core.IService<Estudiantes, int>
 {
 
     private async Task<bool> Existe(int estudianteId)
