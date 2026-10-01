@@ -39,7 +39,7 @@ public class EstudiantesService(
 
     public async Task<Estudiantes?> Buscar(int id)
     {
-        await using var contexto = await dbContext.CreateDbContextAsync();
+        await using var contexto = await contextFactory.CreateDbContextAsync();
         return await contexto.Estudiantes
             .FirstOrDefaultAsync(e => e.EstudiantesID == id);
     }
