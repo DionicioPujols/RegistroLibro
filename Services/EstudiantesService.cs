@@ -23,7 +23,7 @@ public class EstudiantesService(
 
     private async Task<bool> Insetar(Estudiantes estudiantes)
     {
-        await using var contexto = await dbContext.CreateDbContextAsync();
+        await using var contexto = await contextFactory.CreateDbContextAsync();
         contexto.Estudiantes.Add(estudiantes);
         return await contexto
             .SaveChangesAsync() > 0;
