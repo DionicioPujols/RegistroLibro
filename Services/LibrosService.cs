@@ -52,11 +52,11 @@ namespace RegistroLibro.Services
                 .FirstOrDefaultAsync(l => l.LibroId == librosId);
         }
 
-        public async Task<bool> Eliminar(int id)
+        public async Task<bool> Eliminar(int libroId)
         {
             await using var contexto = await contextFactory.CreateDbContextAsync();
             return await contexto.Libros
-                .Where(p => p.LibroId == id)
+                .Where(p => p.LibroId == libroId)
                 .ExecuteDeleteAsync() > 0;
         }
 
