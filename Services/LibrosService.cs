@@ -10,6 +10,19 @@ namespace RegistroLibro.Services
     public class LibrosService(IDbContextFactory<Contexto> 
         contextFactory) : Aplicada1.Core.IService<Libros, int>
     {
+
+        public async Task<bool> Guardar(Libros libro)
+        {
+            if (!await Existe(libro.LibroId))
+            {
+                return await Insertar(libro);
+            }
+            else
+            {
+                return await Modificar(libro);
+            }
+        }
+
         private async Task<bool> Existe(int libroId)
         {
             await using var contexto = await contextFactory.CreateDbContextAsync();
@@ -33,31 +46,11 @@ namespace RegistroLibro.Services
                 .SaveChangesAsync() > 0;
         }
 
-        public async Task<bool> Guardar(Libros libro)
-        {
-            if(!await Existe(libro.LibroId))
-            {
-                return await Insertar(libro);
-            }
-            else
-            {
-                return await Modificar(libro);
-            }
-        }
-
         public async Task<Libros?> Buscar(int librosId)
         {
             await using var contexto = await contextFactory.CreateDbContextAsync();
             return await contexto.Libros
                 .FirstOrDefaultAsync(l => l.LibroId == librosId);
-        }
-
-        public async Task<bool> Eliminar(int libroId)
-        {
-            await using var contexto = await contextFactory.CreateDbContextAsync();
-            return await contexto.Libros
-                .Where(p => p.LibroId == libroId)
-                .ExecuteDeleteAsync() > 0;
         }
 
         public async Task<List<Libros>> GetList(Expression<Func<Libros, bool>> criterio)
@@ -68,5 +61,14 @@ namespace RegistroLibro.Services
                 .AsNoTracking()
                 .ToListAsync();
         }
+
+        public async Task<bool> Eliminar(int libroId)
+        {
+            await using var contexto = await contextFactory.CreateDbContextAsync();
+            return await contexto.Libros
+                .Where(p => p.LibroId == libroId)
+                .ExecuteDeleteAsync() > 0;
+        }
+
     }
 }
