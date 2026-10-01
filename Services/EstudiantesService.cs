@@ -7,8 +7,8 @@ using System.Linq.Expressions;
 using System.Security.AccessControl;
 using System.Security.Cryptography.Xml;
 
-namespace RegistroLibro.Services
-{
+namespace RegistroLibro.Services;
+
     public class EstudiantesService(IDbContextFactory<Contexto>
         dbContext) : Aplicada1.Core.IService<Estudiantes, int>
     {
@@ -72,4 +72,4 @@ namespace RegistroLibro.Services
             }
         }
     }
-}
+
