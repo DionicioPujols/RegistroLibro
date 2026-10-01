@@ -7,7 +7,7 @@ using System.Reflection.PortableExecutable;
 
 namespace RegistroLibro.Services
 {
-    public class PrestamosServices(IDbContextFactory<Contexto> dbContext) : Aplicada1.Core.IService<Prestamos, int>
+    public class PrestamosService(IDbContextFactory<Contexto> dbContext) : Aplicada1.Core.IService<Prestamos, int>
     {
         public async Task<bool> Existe(int PrestamosId)
         {
