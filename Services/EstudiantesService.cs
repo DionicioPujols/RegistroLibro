@@ -9,67 +9,67 @@ using System.Security.Cryptography.Xml;
 
 namespace RegistroLibro.Services;
 
-    public class EstudiantesService(IDbContextFactory<Contexto>
-        dbContext) : Aplicada1.Core.IService<Estudiantes, int>
+public class EstudiantesService(IDbContextFactory<Contexto>
+    dbContext) : Aplicada1.Core.IService<Estudiantes, int>
+{
+
+    private async Task<bool> Existe(int estudianteId)
     {
+        await using var contexto = await dbContext.CreateDbContextAsync();
+        return await contexto.Estudiantes
+        .AnyAsync(e => e.EstudiantesID == estudianteId);
+    }
 
-        private async Task<bool> Existe(int estudianteId)
+    private async Task<bool> Insetar(Estudiantes estudiantes)
+    {
+        await using var contexto = await dbContext.CreateDbContextAsync();
+        contexto.Estudiantes.Add(estudiantes);
+        return await contexto
+            .SaveChangesAsync() > 0;
+    }
+
+    private async Task<bool> Modificar(Estudiantes estudiantes)
+    {
+        await using var contexto = await dbContext.CreateDbContextAsync();
+        contexto.Estudiantes.Update(estudiantes);
+        return await contexto
+            .SaveChangesAsync() > 0;
+    }
+
+    public async Task<Estudiantes?> Buscar(int id)
+    {
+        await using var contexto = await dbContext.CreateDbContextAsync();
+        return await contexto.Estudiantes
+            .FirstOrDefaultAsync(e => e.EstudiantesID == id);
+    }
+
+    public async Task<bool> Eliminar(int id)
+    {
+        await using var contexto = await dbContext.CreateDbContextAsync();
+        return await contexto.Estudiantes
+            .Where(d => d.EstudiantesID == id)
+            .ExecuteDeleteAsync() > 0;
+    }
+
+    public async Task<List<Estudiantes>> GetList(Expression<Func<Estudiantes, bool>> criterio)
+    {
+        await using var contexto = await dbContext.CreateDbContextAsync();
+        return await contexto.Estudiantes
+            .Where(criterio)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<bool> Guardar(Estudiantes estudiantes)
+    {
+        if (!await Existe(estudiantes.EstudiantesID))
         {
-            await using var contexto = await dbContext.CreateDbContextAsync();
-            return await contexto.Estudiantes
-            .AnyAsync(e => e.EstudiantesID == estudianteId);
+            return await Insetar(estudiantes);
         }
-
-        private async Task<bool> Insetar(Estudiantes estudiantes)
+        else
         {
-            await using var contexto = await dbContext.CreateDbContextAsync();
-            contexto.Estudiantes.Add(estudiantes);
-            return await contexto
-                .SaveChangesAsync() > 0;
-        }
-
-        private async Task<bool> Modificar(Estudiantes estudiantes)
-        {
-            await using var contexto = await dbContext.CreateDbContextAsync();
-            contexto.Estudiantes.Update(estudiantes);
-            return await contexto
-                .SaveChangesAsync() > 0;
-        }
-
-        public async Task<Estudiantes?> Buscar(int id) 
-        {
-            await using var contexto = await dbContext.CreateDbContextAsync();
-            return await contexto.Estudiantes
-                .FirstOrDefaultAsync(e => e.EstudiantesID == id);
-        }
-
-        public async Task<bool> Eliminar(int id)
-        {
-            await using var contexto = await dbContext.CreateDbContextAsync();
-            return await contexto.Estudiantes
-                .Where(d => d.EstudiantesID == id)
-                .ExecuteDeleteAsync() > 0;
-        }
-
-        public async Task<List<Estudiantes>> GetList(Expression<Func<Estudiantes, bool>> criterio)
-        {
-            await using var contexto = await dbContext.CreateDbContextAsync();
-            return await contexto.Estudiantes
-                .Where(criterio)
-                .AsNoTracking()
-                .ToListAsync();
-        }
-
-        public async Task<bool> Guardar(Estudiantes estudiantes)
-        {
-            if(!await Existe(estudiantes.EstudiantesID))
-            {
-                return await Insetar(estudiantes);
-            }
-            else
-            {
-                return await Modificar(estudiantes);
-            }
+            return await Modificar(estudiantes);
         }
     }
+}
 
