@@ -9,7 +9,7 @@ using System.Security.Cryptography.Xml;
 
 namespace RegistroLibro.Services
 {
-    public class EstudiantesSerivices(IDbContextFactory<Contexto>
+    public class EstudiantesService(IDbContextFactory<Contexto>
         dbContext) : Aplicada1.Core.IService<Estudiantes, int>
     {
 
