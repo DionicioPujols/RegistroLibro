@@ -14,6 +14,18 @@ public class EstudiantesService(
     ) : Aplicada1.Core.IService<Estudiantes, int>
 {
 
+    public async Task<bool> Guardar(Estudiantes estudiantes)
+    {
+        if (!await Existe(estudiantes.EstudiantesID))
+        {
+            return await Insetar(estudiantes);
+        }
+        else
+        {
+            return await Modificar(estudiantes);
+        }
+    }
+
     private async Task<bool> Existe(int estudianteId)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
@@ -44,14 +56,6 @@ public class EstudiantesService(
             .FirstOrDefaultAsync(e => e.EstudiantesID == estudianteId);
     }
 
-    public async Task<bool> Eliminar(int estudianteId)
-    {
-        await using var contexto = await contextFactory.CreateDbContextAsync();
-        return await contexto.Estudiantes
-            .Where(d => d.EstudiantesID == estudianteId)
-            .ExecuteDeleteAsync() > 0;
-    }
-
     public async Task<List<Estudiantes>> GetList(Expression<Func<Estudiantes, bool>> criterio)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
@@ -61,16 +65,12 @@ public class EstudiantesService(
             .ToListAsync();
     }
 
-    public async Task<bool> Guardar(Estudiantes estudiantes)
+    public async Task<bool> Eliminar(int estudianteId)
     {
-        if (!await Existe(estudiantes.EstudiantesID))
-        {
-            return await Insetar(estudiantes);
-        }
-        else
-        {
-            return await Modificar(estudiantes);
-        }
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        return await contexto.Estudiantes
+            .Where(d => d.EstudiantesID == estudianteId)
+            .ExecuteDeleteAsync() > 0;
     }
 }
 
