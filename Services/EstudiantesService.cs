@@ -46,7 +46,7 @@ public class EstudiantesService(
 
     public async Task<bool> Eliminar(int id)
     {
-        await using var contexto = await dbContext.CreateDbContextAsync();
+        await using var contexto = await contextFactory.CreateDbContextAsync();
         return await contexto.Estudiantes
             .Where(d => d.EstudiantesID == id)
             .ExecuteDeleteAsync() > 0;
