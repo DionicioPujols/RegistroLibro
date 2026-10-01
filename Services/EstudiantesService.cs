@@ -37,11 +37,11 @@ public class EstudiantesService(
             .SaveChangesAsync() > 0;
     }
 
-    public async Task<Estudiantes?> Buscar(int id)
+    public async Task<Estudiantes?> Buscar(int EstudianteId)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
         return await contexto.Estudiantes
-            .FirstOrDefaultAsync(e => e.EstudiantesID == id);
+            .FirstOrDefaultAsync(e => e.EstudiantesID == EstudianteId);
     }
 
     public async Task<bool> Eliminar(int id)
