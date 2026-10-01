@@ -54,7 +54,7 @@ public class EstudiantesService(
 
     public async Task<List<Estudiantes>> GetList(Expression<Func<Estudiantes, bool>> criterio)
     {
-        await using var contexto = await dbContext.CreateDbContextAsync();
+        await using var contexto = await contextFactory.CreateDbContextAsync();
         return await contexto.Estudiantes
             .Where(criterio)
             .AsNoTracking()
