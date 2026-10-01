@@ -31,7 +31,7 @@ public class EstudiantesService(
 
     private async Task<bool> Modificar(Estudiantes estudiantes)
     {
-        await using var contexto = await dbContext.CreateDbContextAsync();
+        await using var contexto = await contextFactory.CreateDbContextAsync();
         contexto.Estudiantes.Update(estudiantes);
         return await contexto
             .SaveChangesAsync() > 0;
