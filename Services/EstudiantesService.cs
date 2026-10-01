@@ -32,23 +32,23 @@ public class EstudiantesService(
     private async Task<bool> Modificar(Estudiantes estudiantes)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
-        contexto.Estudiantes.Update(estudiantes);
+        contexto.Update(estudiantes);
         return await contexto
             .SaveChangesAsync() > 0;
     }
 
-    public async Task<Estudiantes?> Buscar(int EstudianteId)
+    public async Task<Estudiantes?> Buscar(int estudianteId)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
         return await contexto.Estudiantes
-            .FirstOrDefaultAsync(e => e.EstudiantesID == EstudianteId);
+            .FirstOrDefaultAsync(e => e.EstudiantesID == estudianteId);
     }
 
-    public async Task<bool> Eliminar(int EstudianteId)
+    public async Task<bool> Eliminar(int estudianteId)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
         return await contexto.Estudiantes
-            .Where(d => d.EstudiantesID == EstudianteId)
+            .Where(d => d.EstudiantesID == estudianteId)
             .ExecuteDeleteAsync() > 0;
     }
 
