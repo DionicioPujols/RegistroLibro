@@ -1,8 +1,9 @@
 @page "/Estudiante/Index"
+
 @inject EstudiantesService estudiantesService
+@inject ToastService toastService
 
 <PageTitle>Registro de Estudiantes</PageTitle>
-
 <div class="container">
     <div class="card shadow-lg">
         <div class="card-header d-flex justify-content-between align-center mb-4">
@@ -38,14 +39,14 @@
 
             <div class="grid">
                 <QuickGrid Items="@estudiantesQueryable" Class="table table-hover mt-3 table-striped">
-                    <PropertyColumn Property="@(e => e.EstudiantesID)" Title="EstudianteId" Sortable="true" />
+                    <PropertyColumn Property="@(e => e.EstudianteId)" Title="EstudianteId" Sortable="true" />
                     <PropertyColumn Property="@(e => e.nombre)" Title="Nombre" Sortable="true" />
                     <PropertyColumn Property="@(e => e.Direccion)" Title="Dirección" Sortable="true" />
                     <PropertyColumn Property="@(e => e.Correo)" Title="Correo" Sortable="true" />
                     <PropertyColumn Property="@(e => e.FechaNacimeinto)" Title="Fecha de Nac." Format="d" Sortable="true" />
                     <TemplateColumn Title="Opciones" Align="Align.Center">
-                        <a href="/Estudiante/Edit/@context.EstudiantesID" class="btn btn-outline-primary"><i class="bi bi-pencil-square"></i></a>
-                        <button type="button" class="btn btn-outline-danger ms-2" @onclick="() => OnShowModalClick(context.EstudiantesID)"><i class="bi bi-trash"></i></button>
+                        <a href="/Estudiante/Edit/@context.EstudianteId" class="btn btn-outline-primary"><i class="bi bi-pencil-square"></i></a>
+                        <button type="button" class="btn btn-outline-danger ms-2" @onclick="() => OnShowModalClick(context.EstudianteId)"><i class="bi bi-trash"></i></button>
                     </TemplateColumn>
                 </QuickGrid>
             </div>
@@ -78,7 +79,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        ListaEstudiantes = await estudiantesService.GetList(p => p.EstudiantesID > 0);
+        ListaEstudiantes = await estudiantesService.GetList(p => p.EstudianteId > 0);
         estudiantesQueryable = ListaEstudiantes.AsQueryable();
     }
 
@@ -96,7 +97,7 @@
             }
         }
         else
-            ListaEstudiantes = await estudiantesService.GetList(p => p.EstudiantesID > 0);
+            ListaEstudiantes = await estudiantesService.GetList(p => p.EstudianteId > 0);
             
         estudiantesQueryable = ListaEstudiantes.AsQueryable();
     }
@@ -118,7 +119,7 @@
         if (eliminado)
         {
             toastService.ShowSuccess("Estudiante eliminado correctamente.");
-            ListaEstudiantes = await estudiantesService.GetList(p => p.EstudiantesID > 0);
+            ListaEstudiantes = await estudiantesService.GetList(p => p.EstudianteId > 0);
             estudiantesQueryable = ListaEstudiantes.AsQueryable();
         }
         else

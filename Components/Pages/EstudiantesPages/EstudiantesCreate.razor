@@ -1,9 +1,10 @@
 ﻿@page "/Estudiante/Create"
+
 @inject EstudiantesService estudiantesService
 @inject NavigationManager navigationManager
+@inject ToastService toastService
 
 <PageTitle>Crear Estudiante</PageTitle>
-
 <EditForm Model="Estudiante" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
 
