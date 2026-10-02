@@ -12,7 +12,7 @@ namespace RegistroLibro.Models
         public DateTime Fecha { get; set; } = DateTime.Now;
 
         [Required(ErrorMessage = "Debe seleccionar un estudiante")]
-        public int EstudiantesID { get; set; }
+        public int EstudiantesId { get; set; }
 
         [Required(ErrorMessage = "Debe seleccionar un libro")]
         public int LibroId { get; set; }
