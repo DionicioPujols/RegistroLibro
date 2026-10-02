@@ -79,7 +79,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        ListaLibros = await gestionLibros.GetList(p => p.LibroId > 0);
+        ListaLibros = await gestionLibros.GetList(p => true);
         librosQueryable = ListaLibros.AsQueryable();
     }
 
@@ -97,7 +97,7 @@
             }
         }
         else
-            ListaLibros = await gestionLibros.GetList(p => p.LibroId > 0);
+            ListaLibros = await gestionLibros.GetList(p => true);
             
         librosQueryable = ListaLibros.AsQueryable();
     }
@@ -119,7 +119,7 @@
         if (eliminado)
         {
             toastService.ShowSuccess("Libro eliminado correctamente.");
-            ListaLibros = await gestionLibros.GetList(p => p.LibroId > 0);
+            ListaLibros = await gestionLibros.GetList(p => true);
             librosQueryable = ListaLibros.AsQueryable();
         }
         else

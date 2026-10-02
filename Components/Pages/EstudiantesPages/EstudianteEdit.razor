@@ -69,21 +69,21 @@
 
 @code {
     [Parameter]
-    public int EstudiantesID { get; set; }
+    public int EstudianteId { get; set; }
 
     public Estudiantes Estudiante { get; set; } = new Estudiantes();
     private Modal modal = default!;
 
     protected override async Task OnInitializedAsync()
     {
-        Estudiante = await estudiantesService.Buscar(EstudiantesID) ?? new Estudiantes();
+        Estudiante = await estudiantesService.Buscar(EstudianteId) ?? new Estudiantes();
     }
 
     public async Task Modificar()
     {
         Estudiante.nombre = Estudiante.nombre?.Trim();
 
-        var nombreExiste = await estudiantesService.GetList(e => e.nombre!.ToLower() == Estudiante.nombre!.ToLower() && e.EstudiantesID != Estudiante.EstudiantesID);
+        var nombreExiste = await estudiantesService.GetList(e => e.nombre!.ToLower() == Estudiante.nombre!.ToLower() && e.EstudianteId != Estudiante.EstudianteId);
 
         if (nombreExiste.Any())
         {
@@ -116,7 +116,7 @@
 
     private async Task EliminarEstudiante()
     {
-        var eliminado = await estudiantesService.Eliminar(EstudiantesID);
+        var eliminado = await estudiantesService.Eliminar(EstudianteId);
         if (eliminado)
         {
             toastService.ShowSuccess("Estudiante eliminado correctamente.");

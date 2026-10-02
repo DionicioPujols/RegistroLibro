@@ -79,7 +79,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        ListaEstudiantes = await estudiantesService.GetList(p => p.EstudianteId > 0);
+        ListaEstudiantes = await estudiantesService.GetList(p => true);
         estudiantesQueryable = ListaEstudiantes.AsQueryable();
     }
 
@@ -97,7 +97,7 @@
             }
         }
         else
-            ListaEstudiantes = await estudiantesService.GetList(p => p.EstudianteId > 0);
+            ListaEstudiantes = await estudiantesService.GetList(p => true);
             
         estudiantesQueryable = ListaEstudiantes.AsQueryable();
     }
@@ -119,7 +119,7 @@
         if (eliminado)
         {
             toastService.ShowSuccess("Estudiante eliminado correctamente.");
-            ListaEstudiantes = await estudiantesService.GetList(p => p.EstudianteId > 0);
+            ListaEstudiantes = await estudiantesService.GetList(p => true);
             estudiantesQueryable = ListaEstudiantes.AsQueryable();
         }
         else

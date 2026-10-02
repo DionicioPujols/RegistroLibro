@@ -82,7 +82,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        ListaPrestamos = await prestamosService.GetList(p => p.PrestamoId > 0);
+        ListaPrestamos = await prestamosService.GetList(p => true);
         prestamosQueryable = ListaPrestamos.AsQueryable();
     }
 
@@ -100,7 +100,7 @@
             }
         }
         else
-            ListaPrestamos = await prestamosService.GetList(p => p.PrestamoId > 0);
+            ListaPrestamos = await prestamosService.GetList(p => true);
             
         prestamosQueryable = ListaPrestamos.AsQueryable();
     }
@@ -122,7 +122,7 @@
         if (eliminado)
         {
             toastService.ShowSuccess("Préstamo eliminado correctamente.");
-            ListaPrestamos = await prestamosService.GetList(p => p.PrestamoId > 0);
+            ListaPrestamos = await prestamosService.GetList(p => true);
             prestamosQueryable = ListaPrestamos.AsQueryable();
         }
         else

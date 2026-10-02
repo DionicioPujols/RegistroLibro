@@ -84,8 +84,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        ListaEstudiantes = await estudiantesService.GetList(e => e.EstudianteId > 0);
-        ListaLibros = await librosService.GetList(l => l.LibroId > 0);
+        ListaEstudiantes = await estudiantesService.GetList(e => true);
+        ListaLibros = await librosService.GetList(l => true);
         Prestamo = await prestamosService.Buscar(id) ?? new Prestamos();
     }
 
