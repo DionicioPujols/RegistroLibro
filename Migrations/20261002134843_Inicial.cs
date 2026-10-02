@@ -51,15 +51,14 @@ namespace RegistroLibro.Migrations
                     Fecha = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EstudianteId = table.Column<int>(type: "int", nullable: false),
                     LibroId = table.Column<int>(type: "int", nullable: false),
-                    Devuelto = table.Column<bool>(type: "bit", nullable: false),
-                    EstudiantesID = table.Column<int>(type: "int", nullable: false)
+                    Devuelto = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Prestamos", x => x.PrestamoId);
                     table.ForeignKey(
-                        name: "FK_Prestamos_Estudiantes_EstudiantesID",
-                        column: x => x.EstudiantesID,
+                        name: "FK_Prestamos_Estudiantes_EstudianteId",
+                        column: x => x.EstudianteId,
                         principalTable: "Estudiantes",
                         principalColumn: "EstudianteId",
                         onDelete: ReferentialAction.Cascade);
@@ -72,9 +71,9 @@ namespace RegistroLibro.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Prestamos_EstudiantesID",
+                name: "IX_Prestamos_EstudianteId",
                 table: "Prestamos",
-                column: "EstudiantesID");
+                column: "EstudianteId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Prestamos_LibroId",
