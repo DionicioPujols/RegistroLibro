@@ -12,7 +12,7 @@ public class EstudiantesService(
 
     public async Task<bool> Guardar(Estudiantes estudiante)
     {
-        if (!await Existe(estudiante.EstudiantesId))
+        if (!await Existe(estudiante.EstudianteId))
         {
             return await Insetar(estudiante);
         }
@@ -26,7 +26,7 @@ public class EstudiantesService(
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
         return await contexto.Estudiantes
-        .AnyAsync(e => e.EstudiantesId == estudianteId);
+        .AnyAsync(e => e.EstudianteId == estudianteId);
     }
 
     private async Task<bool> Insetar(Estudiantes estudiantes)
@@ -49,7 +49,7 @@ public class EstudiantesService(
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
         return await contexto.Estudiantes
-            .FirstOrDefaultAsync(e => e.EstudiantesId == estudianteId);
+            .FirstOrDefaultAsync(e => e.EstudianteId == estudianteId);
     }
 
     public async Task<List<Estudiantes>> GetList(Expression<Func<Estudiantes, bool>> criterio)
@@ -65,7 +65,7 @@ public class EstudiantesService(
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
         return await contexto.Estudiantes
-            .Where(d => d.EstudiantesId == estudianteId)
+            .Where(d => d.EstudianteId == estudianteId)
             .ExecuteDeleteAsync() > 0;
     }
 }

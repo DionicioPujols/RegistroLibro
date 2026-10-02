@@ -12,7 +12,7 @@ using RegistroLibro.Context;
 namespace RegistroLibro.Migrations
 {
     [DbContext(typeof(Contexto))]
-    [Migration("20260927233351_Inicial")]
+    [Migration("20261002024152_Inicial")]
     partial class Inicial
     {
         /// <inheritdoc />
@@ -27,11 +27,11 @@ namespace RegistroLibro.Migrations
 
             modelBuilder.Entity("RegistroLibro.Models.Estudiantes", b =>
                 {
-                    b.Property<int>("EstudiantesID")
+                    b.Property<int>("EstudianteId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EstudiantesID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EstudianteId"));
 
                     b.Property<string>("Correo")
                         .IsRequired()
@@ -48,7 +48,7 @@ namespace RegistroLibro.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("EstudiantesID");
+                    b.HasKey("EstudianteId");
 
                     b.ToTable("Estudiantes");
                 });
@@ -87,6 +87,9 @@ namespace RegistroLibro.Migrations
 
                     b.Property<bool>("Devuelto")
                         .HasColumnType("bit");
+
+                    b.Property<int>("EstudianteId")
+                        .HasColumnType("int");
 
                     b.Property<int>("EstudiantesID")
                         .HasColumnType("int");

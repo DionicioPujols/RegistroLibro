@@ -15,7 +15,7 @@ namespace RegistroLibro.Migrations
                 name: "Estudiantes",
                 columns: table => new
                 {
-                    EstudiantesID = table.Column<int>(type: "int", nullable: false)
+                    EstudianteId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Direccion = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -24,7 +24,7 @@ namespace RegistroLibro.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Estudiantes", x => x.EstudiantesID);
+                    table.PrimaryKey("PK_Estudiantes", x => x.EstudianteId);
                 });
 
             migrationBuilder.CreateTable(
@@ -49,9 +49,10 @@ namespace RegistroLibro.Migrations
                     PrestamoId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Fecha = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EstudiantesID = table.Column<int>(type: "int", nullable: false),
+                    EstudianteId = table.Column<int>(type: "int", nullable: false),
                     LibroId = table.Column<int>(type: "int", nullable: false),
-                    Devuelto = table.Column<bool>(type: "bit", nullable: false)
+                    Devuelto = table.Column<bool>(type: "bit", nullable: false),
+                    EstudiantesID = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -60,7 +61,7 @@ namespace RegistroLibro.Migrations
                         name: "FK_Prestamos_Estudiantes_EstudiantesID",
                         column: x => x.EstudiantesID,
                         principalTable: "Estudiantes",
-                        principalColumn: "EstudiantesID",
+                        principalColumn: "EstudianteId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Prestamos_Libros_LibroId",

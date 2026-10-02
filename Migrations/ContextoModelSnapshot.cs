@@ -24,11 +24,11 @@ namespace RegistroLibro.Migrations
 
             modelBuilder.Entity("RegistroLibro.Models.Estudiantes", b =>
                 {
-                    b.Property<int>("EstudiantesID")
+                    b.Property<int>("EstudianteId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EstudiantesID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EstudianteId"));
 
                     b.Property<string>("Correo")
                         .IsRequired()
@@ -45,7 +45,7 @@ namespace RegistroLibro.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("EstudiantesID");
+                    b.HasKey("EstudianteId");
 
                     b.ToTable("Estudiantes");
                 });
@@ -84,6 +84,9 @@ namespace RegistroLibro.Migrations
 
                     b.Property<bool>("Devuelto")
                         .HasColumnType("bit");
+
+                    b.Property<int>("EstudianteId")
+                        .HasColumnType("int");
 
                     b.Property<int>("EstudiantesID")
                         .HasColumnType("int");
