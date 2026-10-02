@@ -1,11 +1,12 @@
 @page "/Prestamo/Edit/{id:int}"
+
 @inject PrestamosService prestamosService
 @inject EstudiantesService estudiantesService
 @inject LibrosService librosService
 @inject NavigationManager navigationManager
+@inject ToastService toastService
 
 <PageTitle>Editar Préstamo</PageTitle>
-
 <EditForm Model="Prestamo" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
 
@@ -39,14 +40,14 @@
                 @* Estudiante *@
                 <div class="mb-3">
                     <label class="form-label"><strong>Estudiante</strong></label>
-                    <InputSelect class="form-select" @bind-Value="Prestamo.EstudiantesID">
+                    <InputSelect class="form-select" @bind-Value="Prestamo.EstudianteId">
                         <option value="0" disabled>Seleccione un estudiante</option>
                         @foreach (var estudiante in ListaEstudiantes)
                         {
-                            <option value="@estudiante.EstudiantesID">@estudiante.nombre</option>
+                            <option value="@estudiante.EstudianteId">@estudiante.nombre</option>
                         }
                     </InputSelect>
-                    <ValidationMessage For="(() => Prestamo.EstudiantesID)" />
+                    <ValidationMessage For="(() => Prestamo.EstudianteId)" />
                 </div>
 
             </div>
@@ -83,14 +84,14 @@
 
     protected override async Task OnInitializedAsync()
     {
-        ListaEstudiantes = await estudiantesService.GetList(e => e.EstudiantesID > 0);
+        ListaEstudiantes = await estudiantesService.GetList(e => e.EstudianteId > 0);
         ListaLibros = await librosService.GetList(l => l.LibroId > 0);
         Prestamo = await prestamosService.Buscar(id) ?? new Prestamos();
     }
 
     public async Task Guardar()
     {
-        if(Prestamo.EstudiantesID == 0)
+        if(Prestamo.EstudianteId == 0)
         {
             toastService.ShowError("Debe seleccionar un estudiante.");
             return;
