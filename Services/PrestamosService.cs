@@ -7,31 +7,33 @@ using System.Reflection.PortableExecutable;
 
 namespace RegistroLibro.Services
 {
-    public class PrestamosService(IDbContextFactory<Contexto> dbContext) : Aplicada1.Core.IService<Prestamos, int>
+    public class PrestamosService(
+        IDbContextFactory<Contexto> contextFactory)
+        : Aplicada1.Core.IService<Prestamos, int>
     {
         public async Task<bool> Existe(int PrestamosId)
         {
-            await using var contexto = await dbContext.CreateDbContextAsync();
+            await using var contexto = await contextFactory.CreateDbContextAsync();
             return await contexto.Prestamos.AnyAsync(p => p.PrestamoId == PrestamosId);
         }
 
         public async Task<bool> Insertar(Prestamos prestamos)
         {
-            await using var contexto = await dbContext.CreateDbContextAsync();
+            await using var contexto = await contextFactory.CreateDbContextAsync();
             contexto.Prestamos.Add(prestamos);
             return await contexto.SaveChangesAsync() > 0;
         }
 
         public async Task<bool> Modificar(Prestamos prestamos)
         {
-            await using var contexto = await dbContext.CreateDbContextAsync();
+            await using var contexto = await contextFactory.CreateDbContextAsync();
             contexto.Prestamos.Update(prestamos);
             return await contexto.SaveChangesAsync() > 0;
         }
 
         public async Task<Prestamos?> Buscar(int id)
         {
-            await using var contexto = await dbContext.CreateDbContextAsync();
+            await using var contexto = await contextFactory.CreateDbContextAsync();
             return await contexto.Prestamos
                 .Include(p => p.Estudiante)
                 .Include(p => p.Libro)
@@ -40,7 +42,7 @@ namespace RegistroLibro.Services
 
         public async Task<bool> Eliminar(int id)
         {
-            await using var contexto = await dbContext.CreateDbContextAsync();
+            await using var contexto = await contextFactory.CreateDbContextAsync();
             var prestamo = await contexto.Prestamos
                 .FirstOrDefaultAsync(p => p.PrestamoId == id);
 
@@ -52,7 +54,7 @@ namespace RegistroLibro.Services
 
         public async Task<List<Prestamos>> GetList(Expression<Func<Prestamos, bool>> criterio)
         {
-            await using var contexto = await dbContext.CreateDbContextAsync();
+            await using var contexto = await contextFactory.CreateDbContextAsync();
             return await contexto.Prestamos
                 .Include(p => p.Estudiante)
                 .Include(p => p.Libro)
