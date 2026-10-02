@@ -1,8 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 using RegistroLibro.Context;
 using RegistroLibro.Models;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace RegistroLibro.Services
