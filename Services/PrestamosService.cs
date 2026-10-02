@@ -27,7 +27,7 @@ namespace RegistroLibro.Services
         public async Task<bool> Modificar(Prestamos prestamos)
         {
             await using var contexto = await contextFactory.CreateDbContextAsync();
-            contexto.Prestamos.Update(prestamos);
+            contexto.Update(prestamos);
             return await contexto.SaveChangesAsync() > 0;
         }
 
