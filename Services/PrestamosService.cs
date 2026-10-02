@@ -31,20 +31,20 @@ namespace RegistroLibro.Services
             return await contexto.SaveChangesAsync() > 0;
         }
 
-        public async Task<Prestamos?> Buscar(int id)
+        public async Task<Prestamos?> Buscar(int prestamoId)
         {
             await using var contexto = await contextFactory.CreateDbContextAsync();
             return await contexto.Prestamos
                 .Include(p => p.Estudiante)
                 .Include(p => p.Libro)
-                .FirstOrDefaultAsync(p => p.PrestamoId == id);
+                .FirstOrDefaultAsync(p => p.PrestamoId == prestamoId);
         }
 
-        public async Task<bool> Eliminar(int id)
+        public async Task<bool> Eliminar(int prestamoId)
         {
             await using var contexto = await contextFactory.CreateDbContextAsync();
             var prestamo = await contexto.Prestamos
-                .FirstOrDefaultAsync(p => p.PrestamoId == id);
+                .FirstOrDefaultAsync(p => p.PrestamoId == prestamoId);
 
             if (prestamo == null) return false;
 
