@@ -10,15 +10,15 @@ public class EstudiantesService(
     ) : Aplicada1.Core.IService<Estudiantes, int>
 {
 
-    public async Task<bool> Guardar(Estudiantes estudiantes)
+    public async Task<bool> Guardar(Estudiantes estudiante)
     {
-        if (!await Existe(estudiantes.EstudiantesId))
+        if (!await Existe(estudiante.EstudiantesId))
         {
-            return await Insetar(estudiantes);
+            return await Insetar(estudiante);
         }
         else
         {
-            return await Modificar(estudiantes);
+            return await Modificar(estudiante);
         }
     }
 
