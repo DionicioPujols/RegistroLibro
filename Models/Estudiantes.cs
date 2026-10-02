@@ -6,7 +6,7 @@ namespace RegistroLibro.Models;
 public class Estudiantes
 {
     [Key]
-    public int EstudiantesId { get; set; }
+    public int EstudianteId { get; set; }
 
     [Required(ErrorMessage = "El nombre es obligatorio.")]
     public string? nombre { get; set; }
