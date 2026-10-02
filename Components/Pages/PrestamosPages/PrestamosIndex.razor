@@ -49,7 +49,7 @@
                     </TemplateColumn>
                     <TemplateColumn Title="Opciones" Align="Align.Center">
                         <a href="/Prestamo/Edit/@context.PrestamoId" class="btn btn-outline-primary"><i class="bi bi-pencil-square"></i></a>
-                        <button type="button" class="btn btn-outline-danger ms-2" @onclick="() => OnShowModalClick(context.PrestamoId)"><i class="bi bi-trash"></i></button>
+                        <button type="button" class="btn btn-outline-danger ms-2" data-bs-toggle="modal" data-bs-target="#deleteModal" @onclick="() => prestamoIdToDelete = context.PrestamoId"><i class="bi bi-trash"></i></button>
                     </TemplateColumn>
                 </QuickGrid>
             </div>
@@ -60,15 +60,23 @@
     </div>
 </div>
 
-<Modal @ref="modal" Title="Confirmar Eliminación">
-    <BodyTemplate>
-        <p>¿Está seguro de que desea eliminar este préstamo?</p>
-    </BodyTemplate>
-    <FooterTemplate>
-        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">Cancelar</Button>
-        <Button Color="ButtonColor.Danger" @onclick="EliminarPrestamo">Eliminar</Button>
-    </FooterTemplate>
-</Modal>
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="deleteModalLabel">Confirmar Eliminación</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ¿Está seguro de que desea eliminar este préstamo?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" @onclick="EliminarPrestamo">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @code {
     public List<Prestamos> ListaPrestamos { get; set; } = new List<Prestamos>();
@@ -77,7 +85,6 @@
     public string Filtro { get; set; } = string.Empty;
     public string ValorFiltro { get; set; } = string.Empty;
 
-    private Modal modal = default!;
     private int prestamoIdToDelete;
 
     protected override async Task OnInitializedAsync()
@@ -105,17 +112,6 @@
         prestamosQueryable = ListaPrestamos.AsQueryable();
     }
 
-    private async Task OnShowModalClick(int id)
-    {
-        prestamoIdToDelete = id;
-        await modal.ShowAsync();
-    }
-
-    private async Task OnHideModalClick()
-    {
-        await modal.HideAsync();
-    }
-
     private async Task EliminarPrestamo()
     {
         var eliminado = await prestamosService.Eliminar(prestamoIdToDelete);
@@ -129,6 +125,5 @@
         {
             toastService.ShowError("No se pudo eliminar el préstamo.");
         }
-        await modal.HideAsync();
     }
 }

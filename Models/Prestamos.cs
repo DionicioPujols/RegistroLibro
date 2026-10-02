@@ -22,7 +22,7 @@ public class Prestamos
 
     public bool Devuelto { get; set; } = false;
 
-    [ForeignKey("EstudiantesID")]
+    [ForeignKey("EstudianteId")]
     [InverseProperty("Prestamos")]
-    public virtual Estudiantes Estudiante { get; set; } = null!;
+    public virtual Estudiantes? Estudiante { get; set; }
 }

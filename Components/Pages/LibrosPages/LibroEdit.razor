@@ -44,28 +44,35 @@
                     <span class="bi bi-arrow-left"></span> Volver
                 </a>
                 <button type="submit" class="btn btn-primary ms-2"><i class="bi bi-floppy"></i> Modificar</button>
-                <button type="button" class="btn btn-danger ms-2" @onclick="OnShowModalClick"><i class="bi bi-trash"></i> Eliminar</button>
+                <button type="button" class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#deleteModal"><i class="bi bi-trash"></i> Eliminar</button>
             </div>
         </div>
     </div>
 </EditForm>
 
-<Modal @ref="modal" Title="Confirmar Eliminación">
-    <BodyTemplate>
-        <p>¿Está seguro de que desea eliminar este libro?</p>
-    </BodyTemplate>
-    <FooterTemplate>
-        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">Cancelar</Button>
-        <Button Color="ButtonColor.Danger" @onclick="EliminarLibro">Eliminar</Button>
-    </FooterTemplate>
-</Modal>
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="deleteModalLabel">Confirmar Eliminación</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ¿Está seguro de que desea eliminar este préstamo?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" @onclick="EliminarLibro">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @code {
     [Parameter]
     public int LibroId { get; set; }
 
     public Libros Libro { get; set; } = new Libros();
-    private Modal modal = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -97,16 +104,6 @@
         }
     }
 
-    private async Task OnShowModalClick()
-    {
-        await modal.ShowAsync();
-    }
-
-    private async Task OnHideModalClick()
-    {
-        await modal.HideAsync();
-    }
-
     private async Task EliminarLibro()
     {
         var eliminado = await gestionLibros.Eliminar(LibroId);
@@ -119,6 +116,5 @@
         {
             toastService.ShowError("No se pudo eliminar el libro.");
         }
-        await modal.HideAsync();
     }
 }

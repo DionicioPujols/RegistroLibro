@@ -88,9 +88,6 @@ namespace RegistroLibro.Migrations
                     b.Property<int>("EstudianteId")
                         .HasColumnType("int");
 
-                    b.Property<int>("EstudiantesID")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("datetime2");
 
@@ -99,7 +96,7 @@ namespace RegistroLibro.Migrations
 
                     b.HasKey("PrestamoId");
 
-                    b.HasIndex("EstudiantesID");
+                    b.HasIndex("EstudianteId");
 
                     b.HasIndex("LibroId");
 
@@ -110,7 +107,7 @@ namespace RegistroLibro.Migrations
                 {
                     b.HasOne("RegistroLibro.Models.Estudiantes", "Estudiante")
                         .WithMany("Prestamos")
-                        .HasForeignKey("EstudiantesID")
+                        .HasForeignKey("EstudianteId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
