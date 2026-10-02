@@ -1,11 +1,7 @@
-using Azure.Core;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client.NativeInterop;
 using RegistroLibro.Context;
 using RegistroLibro.Models;
 using System.Linq.Expressions;
-using System.Security.AccessControl;
-using System.Security.Cryptography.Xml;
 
 namespace RegistroLibro.Services;
 

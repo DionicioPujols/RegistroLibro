@@ -1,9 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
 using RegistroLibro.Context;
 using RegistroLibro.Models;
 using System.Linq.Expressions;
-using System.Reflection.PortableExecutable;
 
 namespace RegistroLibro.Services
 {
