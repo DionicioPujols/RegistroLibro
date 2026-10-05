@@ -7,7 +7,6 @@
 <PageTitle>Modificar Libro</PageTitle>
 <EditForm Model="Libro" OnValidSubmit="Modificar">
     <DataAnnotationsValidator />
-    <ValidationSummary />
 
     <div class="container">
         <div class="card shadow-lg">
@@ -40,9 +39,7 @@
 
             @* Botones de Acción *@
             <div class="card-footer text-center mt-2">
-                <a href="/Libro/Index" class="btn btn-secondary">
-                    <span class="bi bi-arrow-left"></span> Volver
-                </a>
+                <a href="/Libro/Index" class="btn btn-secondary"><span class="bi bi-arrow-left"></span> Volver</a>
                 <button type="submit" class="btn btn-primary ms-2"><i class="bi bi-floppy"></i> Modificar</button>
                 <button type="button" class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#deleteModal"><i class="bi bi-trash"></i> Eliminar</button>
             </div>
