@@ -11,7 +11,7 @@ public class Prestamos
     [Required(ErrorMessage = "La fecha es obligatoria")]
     public DateTime Fecha { get; set; } = DateTime.Now;
 
-    [Required(ErrorMessage = "Debe seleccionar un estudiante")]
+    [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un estudiante")]
     public int EstudianteId { get; set; }
 
     [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un libro")]
