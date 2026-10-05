@@ -14,7 +14,7 @@ public class Prestamos
     [Required(ErrorMessage = "Debe seleccionar un estudiante")]
     public int EstudianteId { get; set; }
 
-    [Required(ErrorMessage = "Debe seleccionar un libro")]
+    [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un libro")]
     public int LibroId { get; set; }
 
     [ForeignKey("LibroId")]
