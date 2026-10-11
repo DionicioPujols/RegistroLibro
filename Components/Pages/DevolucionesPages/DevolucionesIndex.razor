@@ -26,6 +26,8 @@
                     <InputSelect class="form-select" @bind-Value="Filtro">
                         <option value="" selected disabled>Elija una opción</option>
                         <option value="ID">ID</option>
+                        <option value="Estudiante">Estudiante</option>
+                        <option value="Libro">Libro</option>
                     </InputSelect>
                 </div>
                 
@@ -75,6 +77,14 @@
             if (Filtro == "ID" && int.TryParse(ValorFiltro, out int id))
             {
                 ListaDevoluciones = await devolucionesService.GetList(d => d.DevolucionId == id);
+            }
+            else if (Filtro == "Estudiante")
+            {
+                ListaDevoluciones = await devolucionesService.GetList(d => d.Prestamo != null && d.Prestamo.Estudiante != null && d.Prestamo.Estudiante.nombre!.ToLower().Contains(ValorFiltro.ToLower()));
+            }
+            else if (Filtro == "Libro")
+            {
+                ListaDevoluciones = await devolucionesService.GetList(d => d.Prestamo != null && d.Prestamo.Libro != null && d.Prestamo.Libro.Titulo!.ToLower().Contains(ValorFiltro.ToLower()));
             }
         }
         else

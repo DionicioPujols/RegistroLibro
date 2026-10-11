@@ -68,7 +68,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Devolucion = await devolucionesService.Buscar(DevolucionId) ?? new Devoluciones()ñ
+        Devolucion = await devolucionesService.Buscar(DevolucionId) ?? new Devoluciones();
         ListaPrestamos = await prestamosService.GetList(p => true);
     }
 

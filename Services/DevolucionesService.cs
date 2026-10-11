@@ -47,6 +47,9 @@ public class DevolucionesService(
         await using var contexto = await contextFactory.CreateDbContextAsync();
         return await contexto.Devoluciones
             .Include(d => d.Prestamo)
+                .ThenInclude(p => p!.Estudiante)
+            .Include(d => d.Prestamo)
+                .ThenInclude(p => p!.Libro)
             .FirstOrDefaultAsync(d => d.DevolucionId == devolucionId);
     }
 
@@ -55,6 +58,9 @@ public class DevolucionesService(
         await using var contexto = await contextFactory.CreateDbContextAsync();
         return await contexto.Devoluciones
             .Include(d => d.Prestamo)
+                .ThenInclude(p => p!.Estudiante)
+            .Include(d => d.Prestamo)
+                .ThenInclude(p => p!.Libro)
             .Where(criterio)
             .AsNoTracking()
             .ToListAsync();
