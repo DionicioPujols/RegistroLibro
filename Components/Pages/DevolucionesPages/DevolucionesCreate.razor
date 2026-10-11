@@ -52,7 +52,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        ListaPrestamosActivos = await prestamosService.GetList(p => !p.Devuelto);
+        var result = await prestamosService.GetList(p => !p.Devuelto);
+        result.OnSuccess(p => ListaPrestamosActivos = p);
     }
 
     public async Task Guardar()
@@ -64,13 +65,19 @@
         }
 
         var devolucionesExistentes = await devolucionesService.GetList(d => d.PrestamoId == Devolucion.PrestamoId);
-        if (devolucionesExistentes.Any())
+        bool yaExisteDevolucion = false;
+        devolucionesExistentes.OnSuccess(d => yaExisteDevolucion = d.Any());
+
+        if (yaExisteDevolucion)
         {
             toastService.ShowError("Ya existe una devolución registrada para este préstamo.");
             return;
         }
 
-        var prestamo = await prestamosService.Buscar(Devolucion.PrestamoId);
+        var prestamoResult = await prestamosService.Buscar(Devolucion.PrestamoId);
+        Prestamos? prestamo = null;
+        prestamoResult.OnSuccess(p => prestamo = p);
+
         if (prestamo == null || prestamo.Devuelto)
         {
             toastService.ShowError("El préstamo no existe o ya fue devuelto.");
@@ -81,16 +88,16 @@
         await prestamosService.Modificar(prestamo);
 
         var creado = await devolucionesService.Guardar(Devolucion);
-        if (creado)
+        creado.OnSuccess(() =>
         {
             toastService.ShowSuccess("Devolución registrada correctamente.");
             navigationManager.NavigateTo("/Devolucion/Index");
-        }
-        else
+        });
+        creado.OnFailure(async () =>
         {
             prestamo.Devuelto = false;
             await prestamosService.Modificar(prestamo);
             toastService.ShowError("No se pudo registrar la devolución.");
-        }
+        });
     }
 }

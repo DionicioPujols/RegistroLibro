@@ -70,7 +70,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        ListaPrestamos = await prestamosService.GetList(p => true);
+        var result = await prestamosService.GetList(p => true);
+        result.OnSuccess(p => ListaPrestamos = p);
         prestamosQueryable = ListaPrestamos.AsQueryable();
     }
 
@@ -80,31 +81,34 @@
         {
             if (Filtro == "ID" && int.TryParse(ValorFiltro, out int id))
             {
-                ListaPrestamos = await prestamosService.GetList(p => p.PrestamoId == id);
+                var result = await prestamosService.GetList(p => p.PrestamoId == id);
+                result.OnSuccess(p => ListaPrestamos = p);
             }
             else if (Filtro == "Estudiante")
             {
-                ListaPrestamos = await prestamosService.GetList(p => p.Estudiante.nombre.ToLower().Contains(ValorFiltro.ToLower()));
+                var result = await prestamosService.GetList(p => p.Estudiante!.nombre!.ToLower().Contains(ValorFiltro.ToLower()));
+                result.OnSuccess(p => ListaPrestamos = p);
             }
         }
         else
-            ListaPrestamos = await prestamosService.GetList(p => true);
+        {
+            var result = await prestamosService.GetList(p => true);
+            result.OnSuccess(p => ListaPrestamos = p);
+        }
             
         prestamosQueryable = ListaPrestamos.AsQueryable();
     }
 
     private async Task EliminarPrestamo()
     {
-        var eliminado = await prestamosService.Eliminar(prestamoIdToDelete);
-        if (eliminado)
+        var result = await prestamosService.Eliminar(prestamoIdToDelete);
+        result.OnSuccess(async () =>
         {
             toastService.ShowSuccess("Préstamo eliminado correctamente.");
-            ListaPrestamos = await prestamosService.GetList(p => true);
+            var listResult = await prestamosService.GetList(p => true);
+            listResult.OnSuccess(p => ListaPrestamos = p);
             prestamosQueryable = ListaPrestamos.AsQueryable();
-        }
-        else
-        {
-            toastService.ShowError("No se pudo eliminar el préstamo.");
-        }
+        });
+        result.OnFailure(() => toastService.ShowError("No se pudo eliminar el préstamo."));
     }
 }

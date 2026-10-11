@@ -68,8 +68,11 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Devolucion = await devolucionesService.Buscar(DevolucionId) ?? new Devoluciones();
-        ListaPrestamos = await prestamosService.GetList(p => true);
+        var devolucionResult = await devolucionesService.Buscar(DevolucionId);
+        devolucionResult.OnSuccess(d => Devolucion = d ?? new Devoluciones());
+
+        var prestamosResult = await prestamosService.GetList(p => true);
+        prestamosResult.OnSuccess(p => ListaPrestamos = p);
     }
 
     public async Task Guardar()
@@ -79,22 +82,22 @@
 
     private async Task EliminarDevolucion()
     {
-        var prestamo = await prestamosService.Buscar(Devolucion.PrestamoId);
+        var prestamoResult = await prestamosService.Buscar(Devolucion.PrestamoId);
+        Prestamos? prestamo = null;
+        prestamoResult.OnSuccess(p => prestamo = p);
+
         if(prestamo != null)
         {
             prestamo.Devuelto = false;
             await prestamosService.Modificar(prestamo);
         }
 
-        var eliminado = await devolucionesService.Eliminar(DevolucionId);
-        if (eliminado)
+        var result = await devolucionesService.Eliminar(DevolucionId);
+        result.OnSuccess(() =>
         {
             toastService.ShowSuccess("Devolución eliminada correctamente.");
             navigationManager.NavigateTo("/Devolucion/Index");
-        }
-        else
-        {
-            toastService.ShowError("No se pudo eliminar la devolución.");
-        }
+        });
+        result.OnFailure(() => toastService.ShowError("No se pudo eliminar la devolución."));
     }
 }

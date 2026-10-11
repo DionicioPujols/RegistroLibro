@@ -73,7 +73,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Libro = await gestionLibros.Buscar(LibroId) ?? new Libros();
+        var result = await gestionLibros.Buscar(LibroId);
+        result.OnSuccess(libro => Libro = libro ?? new Libros());
     }
 
     public async Task Modificar()
@@ -82,36 +83,33 @@
 
         var tituloExiste = await gestionLibros.GetList(l => l.Titulo!.ToLower() == Libro.Titulo!.ToLower() && l.LibroId != Libro.LibroId);
 
-        if (tituloExiste.Any())
+        bool yaExiste = false;
+        tituloExiste.OnSuccess(lista => yaExiste = lista.Any());
+
+        if (yaExiste)
         {
             toastService.ShowError("Ya existe otro libro registrado con este título.");
             return;
         }
 
-        var modificado = await gestionLibros.Guardar(Libro);
+        var result = await gestionLibros.Guardar(Libro);
 
-        if (modificado)
+        result.OnSuccess(() =>
         {
             toastService.ShowSuccess("Se ha modificado correctamente.");
             navigationManager.NavigateTo("/Libro/Index");
-        }
-        else
-        {
-            toastService.ShowError("No se ha podido modificar correctamente.");
-        }
+        });
+        result.OnFailure(() => toastService.ShowError("No se ha podido modificar correctamente."));
     }
 
     private async Task EliminarLibro()
     {
-        var eliminado = await gestionLibros.Eliminar(LibroId);
-        if (eliminado)
+        var result = await gestionLibros.Eliminar(LibroId);
+        result.OnSuccess(() =>
         {
             toastService.ShowSuccess("Libro eliminado correctamente.");
             navigationManager.NavigateTo("/Libro/Index");
-        }
-        else
-        {
-            toastService.ShowError("No se pudo eliminar el libro.");
-        }
+        });
+        result.OnFailure(() => toastService.ShowError("No se pudo eliminar el libro."));
     }
 }

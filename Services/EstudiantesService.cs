@@ -1,3 +1,4 @@
+using Aplicada1.Core;
 using Microsoft.EntityFrameworkCore;
 using RegistroLibro.Context;
 using RegistroLibro.Models;
@@ -7,18 +8,20 @@ namespace RegistroLibro.Services;
 
 public class EstudiantesService(
     IDbContextFactory<Contexto> contextFactory
-    ) : Aplicada1.Core.IService<Estudiantes, int>
+    ) : Aplicada1.Core.IServiceResult<Estudiantes, int>
 {
 
-    public async Task<bool> Guardar(Estudiantes estudiante)
+    public async Task<Result> Guardar(Estudiantes estudiante)
     {
         if (!await Existe(estudiante.EstudianteId))
         {
-            return await Insetar(estudiante);
+            var inserto = await Insetar(estudiante);
+            return Result.Success(inserto);
         }
         else
         {
-            return await Modificar(estudiante);
+            var modifico = await Modificar(estudiante);
+            return Result.Success(modifico);
         }
     }
 
@@ -45,14 +48,14 @@ public class EstudiantesService(
             .SaveChangesAsync() > 0;
     }
 
-    public async Task<Estudiantes?> Buscar(int estudianteId)
+    public async Task<Result<Estudiantes?>> Buscar(int estudianteId)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
         return await contexto.Estudiantes
             .FirstOrDefaultAsync(e => e.EstudianteId == estudianteId);
     }
 
-    public async Task<List<Estudiantes>> GetList(Expression<Func<Estudiantes, bool>> criterio)
+    public async Task<Result<List<Estudiantes>>> GetList(Expression<Func<Estudiantes, bool>> criterio)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
         return await contexto.Estudiantes
@@ -61,11 +64,12 @@ public class EstudiantesService(
             .ToListAsync();
     }
 
-    public async Task<bool> Eliminar(int estudianteId)
+    public async Task<Result> Eliminar(int estudianteId)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
-        return await contexto.Estudiantes
+        var eliminado = await contexto.Estudiantes
             .Where(d => d.EstudianteId == estudianteId)
             .ExecuteDeleteAsync() > 0;
+        return Result.Success(eliminado);
     }
 }

@@ -71,14 +71,18 @@
 
     protected override async Task OnInitializedAsync()
     {
-        ListaLibros = await gestionLibros.GetList(p => true);
+        var result = await gestionLibros.GetList(p => true);
+        result.OnSuccess(libros => ListaLibros = libros);
         librosQueryable = ListaLibros.AsQueryable();
         await CargarPromedios();
     }
 
     private async Task CargarPromedios()
     {
-        var devoluciones = await devolucionesService.GetList(d => true);
+        var devolucionesResult = await devolucionesService.GetList(d => true);
+        List<Devoluciones> devoluciones = new();
+        devolucionesResult.OnSuccess(d => devoluciones = d);
+
         promediosPorLibro = devoluciones
             .Where(d => d.Prestamo != null)
             .GroupBy(d => d.Prestamo!.LibroId)
@@ -107,58 +111,54 @@
         {
             if (Filtro == "Titulo")
             {
-                ListaLibros = await gestionLibros.GetList(p => p.Titulo!.ToLower().Contains(ValorFiltro.ToLower()));
+                var result = await gestionLibros.GetList(p => p.Titulo!.ToLower().Contains(ValorFiltro.ToLower()));
+                result.OnSuccess(libros => ListaLibros = libros);
             }
             else if (Filtro == "Autor")
             {
-                ListaLibros = await gestionLibros.GetList(p => p.Autor!.ToLower().Contains(ValorFiltro.ToLower()));
+                var result = await gestionLibros.GetList(p => p.Autor!.ToLower().Contains(ValorFiltro.ToLower()));
+                result.OnSuccess(libros => ListaLibros = libros);
             }
         }
         else
-            ListaLibros = await gestionLibros.GetList(p => true);
+        {
+            var result = await gestionLibros.GetList(p => true);
+            result.OnSuccess(libros => ListaLibros = libros);
+        }
             
         librosQueryable = ListaLibros.AsQueryable();
     }
 
     private async Task EliminarLibro()
     {
-        var eliminado = await gestionLibros.Eliminar(libroIdToDelete);
-        if (eliminado)
+        var result = await gestionLibros.Eliminar(libroIdToDelete);
+        result.OnSuccess(async () =>
         {
             toastService.ShowSuccess("Libro eliminado correctamente.");
-            ListaLibros = await gestionLibros.GetList(p => true);
+            var listResult = await gestionLibros.GetList(p => true);
+            listResult.OnSuccess(libros => ListaLibros = libros);
             librosQueryable = ListaLibros.AsQueryable();
-        }
-        else
-        {
-            toastService.ShowError("No se pudo eliminar el libro.");
-        }
+        });
+        result.OnFailure(() => toastService.ShowError("No se pudo eliminar el libro."));
     }
 
     public async Task<double> CalcularPromedioDiasPrestado(int libroId)
     {
-        // 1. Obtener todas las devoluciones (que implican préstamos completados)
-        // relacionadas a los préstamos de este libro específico.
-        var devoluciones = await devolucionesService.GetList(d => d.Prestamo != null && d.Prestamo.LibroId == libroId);
+        var result = await devolucionesService.GetList(d => d.Prestamo != null && d.Prestamo.LibroId == libroId);
+        List<Devoluciones> devoluciones = new();
+        result.OnSuccess(d => devoluciones = d);
 
-        // Si no existen préstamos completados, devolvemos 0 para evitar división por cero
         if (devoluciones.Count == 0)
         {
             return 0;
         }
 
-        // 2. Calcular la duración de cada préstamo completado
         double sumaDias = 0;
         foreach (var devolucion in devoluciones)
         {
-            // Usamos .Date para obtener una diferencia exacta de días, sin contar horas.
             var diferenciaDias = (devolucion.Fecha.Date - devolucion.Prestamo!.Fecha.Date).Days;
-            
-            // Si por error se devuelve con fecha anterior a la del préstamo, lo mínimo es 0 días
             sumaDias += Math.Max(0, diferenciaDias);
         }
-
-        // 3. Obtener el promedio de duración aritmética
         return Math.Round(sumaDias / devoluciones.Count, 2);
     }
 }
