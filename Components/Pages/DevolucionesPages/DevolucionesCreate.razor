@@ -1,0 +1,96 @@
+@page "/Devolucion/Create"
+
+@inject DevolucionesService devolucionesService
+@inject PrestamosService prestamosService
+@inject ToastService toastService
+@inject NavigationManager navigationManager
+
+<PageTitle>Registrar Devolución</PageTitle>
+<EditForm Model="Devolucion" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h5 class="card-title">Registrar Devolución</h5>
+            </div>
+
+            <div class="card-body">
+                @* Fecha *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Fecha</strong></label>
+                    <InputDate class="form-control" @bind-Value="Devolucion.Fecha"></InputDate>
+                    <ValidationMessage For="(() => Devolucion.Fecha)" />
+                </div>
+
+                @* Prestamo a devolver *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Préstamo Activo</strong></label>
+                    <InputSelect class="form-select" @bind-Value="Devolucion.PrestamoId">
+                        <option value="0" selected disabled>Seleccione un préstamo para devolver</option>
+                        @foreach (var prestamo in ListaPrestamosActivos)
+                        {
+                            <option value="@prestamo.PrestamoId">Libro: @prestamo.Libro?.Titulo - Estudiante: @prestamo.Estudiante?.nombre (@prestamo.Fecha.ToString("dd/MM/yyyy"))</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="(() => Devolucion.PrestamoId)" />
+                </div>
+            </div>
+
+            @* Botones de Acción *@
+            <div class="card-footer text-center mt-2">
+                <a href="/Devolucion/Index" class="btn btn-secondary"> <span class="bi bi-arrow-left"></span> Volver</a>
+                <button type="submit" class="btn btn-success bi bi-floppy"> Guardar</button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    public Devoluciones Devolucion { get; set; } = new Devoluciones();
+    public List<Prestamos> ListaPrestamosActivos { get; set; } = new List<Prestamos>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaPrestamosActivos = await prestamosService.GetList(p => !p.Devuelto);
+    }
+
+    public async Task Guardar()
+    {
+        if(Devolucion.PrestamoId == 0)
+        {
+            toastService.ShowError("Debe seleccionar un préstamo.");
+            return;
+        }
+
+        var devolucionesExistentes = await devolucionesService.GetList(d => d.PrestamoId == Devolucion.PrestamoId);
+        if (devolucionesExistentes.Any())
+        {
+            toastService.ShowError("Ya existe una devolución registrada para este préstamo.");
+            return;
+        }
+
+        var prestamo = await prestamosService.Buscar(Devolucion.PrestamoId);
+        if (prestamo == null || prestamo.Devuelto)
+        {
+            toastService.ShowError("El préstamo no existe o ya fue devuelto.");
+            return;
+        }
+
+        prestamo.Devuelto = true;
+        await prestamosService.Modificar(prestamo);
+
+        var creado = await devolucionesService.Guardar(Devolucion);
+        if (creado)
+        {
+            toastService.ShowSuccess("Devolución registrada correctamente.");
+            navigationManager.NavigateTo("/Devolucion/Index");
+        }
+        else
+        {
+            prestamo.Devuelto = false;
+            await prestamosService.Modificar(prestamo);
+            toastService.ShowError("No se pudo registrar la devolución.");
+        }
+    }
+}

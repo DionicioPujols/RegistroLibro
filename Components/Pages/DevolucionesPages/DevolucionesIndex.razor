@@ -1,0 +1,85 @@
+@page "/Devolucion/Index"
+
+@inject DevolucionesService devolucionesService
+@inject ToastService toastService
+
+<PageTitle>Registro de Devoluciones</PageTitle>
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header d-flex justify-content-between align-center mb-4">
+            <h5 class="card-title">Registro de Devoluciones</h5>
+            <a href="/Devolucion/Create" class="btn btn-primary"><i class="bi bi-plus-square"></i> Crear</a>
+        </div>
+
+        @*Controles de busqueda*@
+        <div class="card-body">
+            <div class="row">
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Filtrar por</strong></label>
+                </div>
+                <div class="col-4">
+                    <label class="col-form-label"><strong>Búsqueda</strong></label>
+                </div>
+            </div>
+            <div class="row align-items-center">
+                <div class="col-3">
+                    <InputSelect class="form-select" @bind-Value="Filtro">
+                        <option value="" selected disabled>Elija una opción</option>
+                        <option value="ID">ID</option>
+                    </InputSelect>
+                </div>
+                
+                <div class="col-4">
+                    <div class="input-group">
+                        <input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
+                        <button type="button" class="btn btn-outline-primary" @onclick="Buscar"><i class="bi bi-search"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid">
+                <QuickGrid Items="@devolucionesQueryable" Class="table table-hover mt-3 table-striped">
+                    <PropertyColumn Property="@(d => d.DevolucionId)" Title="DevolucionId" Sortable="true" />
+                    <PropertyColumn Property="@(d => d.Fecha)" Title="Fecha" Format="d" Sortable="true" />
+                    <TemplateColumn Title="Estudiante">@context.Prestamo?.Estudiante?.nombre</TemplateColumn>
+                    <TemplateColumn Title="Libro">@context.Prestamo?.Libro?.Titulo</TemplateColumn>
+                    <TemplateColumn Title="Opciones" Align="Align.Center">
+                        <a href="/Devolucion/Edit/@context.DevolucionId" class="btn btn-outline-primary"><i class="bi bi-pencil-square"></i></a>
+                    </TemplateColumn>
+                </QuickGrid>
+            </div>
+        </div>
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <label class="mb-0">Cantidad:  @ListaDevoluciones.Count()</label>
+        </div>
+    </div>
+</div>
+
+@code {
+    public List<Devoluciones> ListaDevoluciones { get; set; } = new List<Devoluciones>();
+    IQueryable<Devoluciones>? devolucionesQueryable;
+
+    public string Filtro { get; set; } = string.Empty;
+    public string ValorFiltro { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaDevoluciones = await devolucionesService.GetList(d => true);
+        devolucionesQueryable = ListaDevoluciones.AsQueryable();
+    }
+
+    private async Task Buscar()
+    {
+        if (ValorFiltro.Trim() != "")
+        {
+            if (Filtro == "ID" && int.TryParse(ValorFiltro, out int id))
+            {
+                ListaDevoluciones = await devolucionesService.GetList(d => d.DevolucionId == id);
+            }
+        }
+        else
+            ListaDevoluciones = await devolucionesService.GetList(d => true);
+            
+        devolucionesQueryable = ListaDevoluciones.AsQueryable();
+    }
+}
