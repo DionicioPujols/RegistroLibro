@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RegistroLibro.Context;
 
@@ -11,9 +12,11 @@ using RegistroLibro.Context;
 namespace RegistroLibro.Migrations
 {
     [DbContext(typeof(Contexto))]
-    partial class ContextoModelSnapshot : ModelSnapshot
+    [Migration("20261011005603_AgregarCantidadLibros")]
+    partial class AgregarCantidadLibros
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,27 +24,6 @@ namespace RegistroLibro.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("RegistroLibro.Models.Devoluciones", b =>
-                {
-                    b.Property<int>("DevolucionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DevolucionId"));
-
-                    b.Property<DateTime>("Fecha")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("PrestamoId")
-                        .HasColumnType("int");
-
-                    b.HasKey("DevolucionId");
-
-                    b.HasIndex("PrestamoId");
-
-                    b.ToTable("Devoluciones");
-                });
 
             modelBuilder.Entity("RegistroLibro.Models.Estudiantes", b =>
                 {
@@ -128,17 +110,6 @@ namespace RegistroLibro.Migrations
                     b.HasIndex("LibroId");
 
                     b.ToTable("Prestamos");
-                });
-
-            modelBuilder.Entity("RegistroLibro.Models.Devoluciones", b =>
-                {
-                    b.HasOne("RegistroLibro.Models.Prestamos", "Prestamo")
-                        .WithMany()
-                        .HasForeignKey("PrestamoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Prestamo");
                 });
 
             modelBuilder.Entity("RegistroLibro.Models.Prestamos", b =>

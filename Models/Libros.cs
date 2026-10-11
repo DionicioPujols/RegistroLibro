@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace RegistroLibro.Models;
 
@@ -15,4 +15,8 @@ public class Libros
 
     [Required(ErrorMessage = "Debes colocar el año de publicacion")]
     public int anoPublicacion { get; set; }
+
+    public int CantidadPrestamos { get; set; }
+
+    public int CantidadDisponible { get; set; }
 }

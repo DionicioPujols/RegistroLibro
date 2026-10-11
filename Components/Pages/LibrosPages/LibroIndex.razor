@@ -2,6 +2,7 @@
 @page "/"
 
 @inject LibrosService gestionLibros
+@inject DevolucionesService devolucionesService
 @inject ToastService toastService
 
 <PageTitle>Registro de Libros</PageTitle>
@@ -44,6 +45,8 @@
                     <PropertyColumn Property="@(l => l.Titulo)" Title="Título" Sortable="true" />
                     <PropertyColumn Property="@(l => l.Autor)" Title="Autor" Sortable="true" />
                     <PropertyColumn Property="@(l => l.anoPublicacion)" Title="Año de Publicación" Sortable="true" />
+                    <PropertyColumn Property="@(l => l.CantidadDisponible)" Title="Cantidad Disponible" Sortable="true" />
+                    <PropertyColumn Property="@(l => ObtenerPromedioDiasPrestado(l.LibroId))" Title="Promedio de días prestado" Sortable="true" />
                     <TemplateColumn Title="Opciones" Align="Align.Center">
                         <a href="/Libro/Edit/@context.LibroId" class="btn btn-outline-primary"><i class="bi bi-pencil-square"></i></a>
                     </TemplateColumn>
@@ -59,6 +62,7 @@
 @code {
     public List<Libros> ListaLibros { get; set; } = new List<Libros>();
     IQueryable<Libros>? librosQueryable;
+    private Dictionary<int, double> promediosPorLibro = new();
 
     public string Filtro { get; set; } = string.Empty;
     public string ValorFiltro { get; set; } = string.Empty;
@@ -69,6 +73,32 @@
     {
         ListaLibros = await gestionLibros.GetList(p => true);
         librosQueryable = ListaLibros.AsQueryable();
+        await CargarPromedios();
+    }
+
+    private async Task CargarPromedios()
+    {
+        var devoluciones = await devolucionesService.GetList(d => true);
+        promediosPorLibro = devoluciones
+            .Where(d => d.Prestamo != null)
+            .GroupBy(d => d.Prestamo!.LibroId)
+            .ToDictionary(
+                g => g.Key,
+                g =>
+                {
+                    double sumaDias = 0;
+                    foreach (var devolucion in g)
+                    {
+                        var diferenciaDias = (devolucion.Fecha.Date - devolucion.Prestamo!.Fecha.Date).Days;
+                        sumaDias += Math.Max(0, diferenciaDias);
+                    }
+                    return Math.Round(sumaDias / g.Count(), 2);
+                });
+    }
+
+    public double ObtenerPromedioDiasPrestado(int libroId)
+    {
+        return promediosPorLibro.GetValueOrDefault(libroId, 0);
     }
 
     private async Task Buscar()
@@ -103,5 +133,32 @@
         {
             toastService.ShowError("No se pudo eliminar el libro.");
         }
+    }
+
+    public async Task<double> CalcularPromedioDiasPrestado(int libroId)
+    {
+        // 1. Obtener todas las devoluciones (que implican préstamos completados)
+        // relacionadas a los préstamos de este libro específico.
+        var devoluciones = await devolucionesService.GetList(d => d.Prestamo != null && d.Prestamo.LibroId == libroId);
+
+        // Si no existen préstamos completados, devolvemos 0 para evitar división por cero
+        if (devoluciones.Count == 0)
+        {
+            return 0;
+        }
+
+        // 2. Calcular la duración de cada préstamo completado
+        double sumaDias = 0;
+        foreach (var devolucion in devoluciones)
+        {
+            // Usamos .Date para obtener una diferencia exacta de días, sin contar horas.
+            var diferenciaDias = (devolucion.Fecha.Date - devolucion.Prestamo!.Fecha.Date).Days;
+            
+            // Si por error se devuelve con fecha anterior a la del préstamo, lo mínimo es 0 días
+            sumaDias += Math.Max(0, diferenciaDias);
+        }
+
+        // 3. Obtener el promedio de duración aritmética
+        return Math.Round(sumaDias / devoluciones.Count, 2);
     }
 }
