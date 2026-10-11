@@ -50,6 +50,12 @@
                     <ValidationMessage For="(() => Prestamo.EstudianteId)" />
                 </div>
 
+                @* Devuelto *@
+                <div class="mb-3 form-check">
+                    <InputCheckbox class="form-check-input" @bind-Value="Prestamo.Devuelto" id="devueltoCheck" />
+                    <label class="form-check-label" for="devueltoCheck"><strong>Libro Devuelto</strong></label>
+                </div>
+
             </div>
 
             @* Botones de Acción *@
@@ -106,6 +112,20 @@
         if(Prestamo.LibroId == 0)
         {
             toastService.ShowError("Debe seleccionar un libro.");
+            return;
+        }
+
+        var estudiantePrestamos = await prestamosService.GetList(p => p.EstudianteId == Prestamo.EstudianteId && !p.Devuelto && p.PrestamoId != Prestamo.PrestamoId);
+        if (estudiantePrestamos.Any())
+        {
+            toastService.ShowError("Este estudiante ya tiene otro préstamo activo.");
+            return;
+        }
+
+        var libroPrestamos = await prestamosService.GetList(p => p.LibroId == Prestamo.LibroId && !p.Devuelto && p.PrestamoId != Prestamo.PrestamoId);
+        if (libroPrestamos.Any())
+        {
+            toastService.ShowError("Este libro ya está prestado a otra persona.");
             return;
         }
 

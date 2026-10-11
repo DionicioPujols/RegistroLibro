@@ -86,6 +86,13 @@
             return;
         }
 
+        var libroPrestamos = await prestamosService.GetList(p => p.LibroId == Prestamo.LibroId && !p.Devuelto);
+        if (libroPrestamos.Any())
+        {
+            toastService.ShowError("Este libro ya está prestado.");
+            return;
+        }
+
         var creado = await prestamosService.Guardar(Prestamo);
         if (creado)
         {
