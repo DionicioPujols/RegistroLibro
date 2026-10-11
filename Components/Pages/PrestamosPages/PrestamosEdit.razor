@@ -96,9 +96,14 @@
 
     protected override async Task OnInitializedAsync()
     {
-        ListaEstudiantes = await estudiantesService.GetList(e => true);
-        ListaLibros = await librosService.GetList(l => true);
-        Prestamo = await prestamosService.Buscar(PrestamoId) ?? new Prestamos();
+        var estudiantesResult = await estudiantesService.GetList(e => true);
+        estudiantesResult.OnSuccess(e => ListaEstudiantes = e);
+
+        var librosResult = await librosService.GetList(l => true);
+        librosResult.OnSuccess(l => ListaLibros = l);
+
+        var prestamoResult = await prestamosService.Buscar(PrestamoId);
+        prestamoResult.OnSuccess(p => Prestamo = p ?? new Prestamos());
     }
 
     public async Task Guardar()
@@ -116,42 +121,42 @@
         }
 
         var estudiantePrestamos = await prestamosService.GetList(p => p.EstudianteId == Prestamo.EstudianteId && !p.Devuelto && p.PrestamoId != Prestamo.PrestamoId);
-        if (estudiantePrestamos.Any())
+        bool tienePrestamoActivo = false;
+        estudiantePrestamos.OnSuccess(lista => tienePrestamoActivo = lista.Any());
+
+        if (tienePrestamoActivo)
         {
             toastService.ShowError("Este estudiante ya tiene otro préstamo activo.");
             return;
         }
 
         var libroPrestamos = await prestamosService.GetList(p => p.LibroId == Prestamo.LibroId && !p.Devuelto && p.PrestamoId != Prestamo.PrestamoId);
-        if (libroPrestamos.Any())
+        bool libroPrestado = false;
+        libroPrestamos.OnSuccess(lista => libroPrestado = lista.Any());
+
+        if (libroPrestado)
         {
             toastService.ShowError("Este libro ya está prestado a otra persona.");
             return;
         }
 
-        var modificado = await prestamosService.Guardar(Prestamo);
-        if (modificado)
+        var result = await prestamosService.Guardar(Prestamo);
+        result.OnSuccess(() =>
         {
             toastService.ShowSuccess("Préstamo modificado correctamente.");
             navigationManager.NavigateTo("/Prestamo/Index");
-        }
-        else
-        {
-            toastService.ShowError("No se pudo modificar el préstamo.");
-        }
+        });
+        result.OnFailure(() => toastService.ShowError("No se pudo modificar el préstamo."));
     }
 
     private async Task EliminarPrestamo()
     {
-        var eliminado = await prestamosService.Eliminar(PrestamoId);
-        if (eliminado)
+        var result = await prestamosService.Eliminar(PrestamoId);
+        result.OnSuccess(() =>
         {
             toastService.ShowSuccess("Préstamo eliminado correctamente.");
             navigationManager.NavigateTo("/Prestamo/Index");
-        }
-        else
-        {
-            toastService.ShowError("No se pudo eliminar el préstamo.");
-        }
+        });
+        result.OnFailure(() => toastService.ShowError("No se pudo eliminar el préstamo."));
     }
 }

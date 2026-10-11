@@ -55,21 +55,21 @@
 
         var tituloExiste = await gestionLibros.GetList(l => l.Titulo!.ToLower() == Libro.Titulo!.ToLower());
         
-        if (tituloExiste.Any())
+        bool yaExiste = false;
+        tituloExiste.OnSuccess(lista => yaExiste = lista.Any());
+
+        if (yaExiste)
         {
             toastService.ShowError("Ya existe un libro registrado con este título.");
             return; 
         }
 
-        var creado = await gestionLibros.Guardar(Libro);
-        if (creado)
+        var result = await gestionLibros.Guardar(Libro);
+        result.OnSuccess(() =>
         {
             toastService.ShowSuccess("Libro guardado correctamente.");
             navigationManager.NavigateTo("/Libro/Index");
-        }
-        else
-        {
-            toastService.ShowError("No se pudo guardar el libro.");
-        }
+        });
+        result.OnFailure(() => toastService.ShowError("No se pudo guardar el libro."));
     }
 }

@@ -1,4 +1,4 @@
-﻿@page "/Estudiante/Create"
+@page "/Estudiante/Create"
 
 @inject EstudiantesService estudiantesService
 @inject NavigationManager navigationManager
@@ -62,22 +62,22 @@
 
         var estudianteExiste = await estudiantesService.GetList(e => e.nombre!.ToLower() == Estudiante.nombre!.ToLower());
         
-        if (estudianteExiste.Any())
+        bool yaExiste = false;
+        estudianteExiste.OnSuccess(lista => yaExiste = lista.Any());
+
+        if (yaExiste)
         {
             toastService.ShowError("Ya existe un estudiante registrado con este nombre.");
             return; 
         }
 
-        var creado = await estudiantesService.Guardar(Estudiante);
-        if (creado)
+        var result = await estudiantesService.Guardar(Estudiante);
+        result.OnSuccess(() =>
         {
             toastService.ShowSuccess("Estudiante guardado correctamente.");
             navigationManager.NavigateTo("/Estudiante/Index");
-        }
-        else
-        {
-            toastService.ShowError("No se pudo guardar el estudiante.");
-        }
+        });
+        result.OnFailure(() => toastService.ShowError("No se pudo guardar el estudiante."));
     }
 
     public void Nuevo()

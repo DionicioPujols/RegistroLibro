@@ -68,8 +68,11 @@
 
     protected override async Task OnInitializedAsync()
     {
-        ListaEstudiantes = await estudiantesService.GetList(e => true);
-        ListaLibros = await librosService.GetList(l => true);
+        var estudiantesResult = await estudiantesService.GetList(e => true);
+        estudiantesResult.OnSuccess(e => ListaEstudiantes = e);
+
+        var librosResult = await librosService.GetList(l => true);
+        librosResult.OnSuccess(l => ListaLibros = l);
     }
 
     public async Task Guardar()
@@ -87,21 +90,21 @@
         }
 
         var libroPrestamos = await prestamosService.GetList(p => p.LibroId == Prestamo.LibroId && !p.Devuelto);
-        if (libroPrestamos.Any())
+        bool estaPrestado = false;
+        libroPrestamos.OnSuccess(lista => estaPrestado = lista.Any());
+
+        if (estaPrestado)
         {
             toastService.ShowError("Este libro ya está prestado.");
             return;
         }
 
-        var creado = await prestamosService.Guardar(Prestamo);
-        if (creado)
+        var result = await prestamosService.Guardar(Prestamo);
+        result.OnSuccess(() =>
         {
             toastService.ShowSuccess("Préstamo guardado correctamente.");
             navigationManager.NavigateTo("/Prestamo/Index");
-        }
-        else
-        {
-            toastService.ShowError("No se pudo guardar el préstamo.");
-        }
+        });
+        result.OnFailure(() => toastService.ShowError("No se pudo guardar el préstamo."));
     }
 }

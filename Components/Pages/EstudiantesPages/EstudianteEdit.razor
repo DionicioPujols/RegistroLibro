@@ -82,7 +82,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Estudiante = await estudiantesService.Buscar(EstudianteId) ?? new Estudiantes();
+        var result = await estudiantesService.Buscar(EstudianteId);
+        result.OnSuccess(est => Estudiante = est ?? new Estudiantes());
     }
 
     public async Task Modificar()
@@ -91,36 +92,33 @@
 
         var nombreExiste = await estudiantesService.GetList(e => e.nombre!.ToLower() == Estudiante.nombre!.ToLower() && e.EstudianteId != Estudiante.EstudianteId);
 
-        if (nombreExiste.Any())
+        bool yaExiste = false;
+        nombreExiste.OnSuccess(lista => yaExiste = lista.Any());
+
+        if (yaExiste)
         {
             toastService.ShowError("Ya existe otro estudiante registrado con este nombre.");
             return;
         }
 
-        var modificado = await estudiantesService.Guardar(Estudiante);
+        var result = await estudiantesService.Guardar(Estudiante);
 
-        if (modificado)
+        result.OnSuccess(() =>
         {
             toastService.ShowSuccess("Se ha modificado correctamente.");
             navigationManager.NavigateTo("/Estudiante/Index");
-        }
-        else
-        {
-            toastService.ShowError("No se ha podido modificar correctamente.");
-        }
+        });
+        result.OnFailure(() => toastService.ShowError("No se ha podido modificar correctamente."));
     }
 
     private async Task EliminarEstudiante()
     {
-        var eliminado = await estudiantesService.Eliminar(EstudianteId);
-        if (eliminado)
+        var result = await estudiantesService.Eliminar(EstudianteId);
+        result.OnSuccess(() =>
         {
             toastService.ShowSuccess("Estudiante eliminado correctamente.");
             navigationManager.NavigateTo("/Estudiante/Index");
-        }
-        else
-        {
-            toastService.ShowError("No se pudo eliminar el estudiante.");
-        }
+        });
+        result.OnFailure(() => toastService.ShowError("No se pudo eliminar el estudiante."));
     }
 }

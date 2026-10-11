@@ -68,7 +68,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        ListaEstudiantes = await estudiantesService.GetList(p => true);
+        var result = await estudiantesService.GetList(p => true);
+        result.OnSuccess(est => ListaEstudiantes = est);
         estudiantesQueryable = ListaEstudiantes.AsQueryable();
     }
 
@@ -78,31 +79,34 @@
         {
             if (Filtro == "Nombre")
             {
-                ListaEstudiantes = await estudiantesService.GetList(p => p.nombre!.ToLower().Contains(ValorFiltro.ToLower()));
+                var result = await estudiantesService.GetList(p => p.nombre!.ToLower().Contains(ValorFiltro.ToLower()));
+                result.OnSuccess(est => ListaEstudiantes = est);
             }
             else if (Filtro == "Direccion")
             {
-                ListaEstudiantes = await estudiantesService.GetList(p => p.Direccion!.ToLower().Contains(ValorFiltro.ToLower()));
+                var result = await estudiantesService.GetList(p => p.Direccion!.ToLower().Contains(ValorFiltro.ToLower()));
+                result.OnSuccess(est => ListaEstudiantes = est);
             }
         }
         else
-            ListaEstudiantes = await estudiantesService.GetList(p => true);
+        {
+            var result = await estudiantesService.GetList(p => true);
+            result.OnSuccess(est => ListaEstudiantes = est);
+        }
             
         estudiantesQueryable = ListaEstudiantes.AsQueryable();
     }
 
     private async Task EliminarEstudiante()
     {
-        var eliminado = await estudiantesService.Eliminar(estudianteIdToDelete);
-        if (eliminado)
+        var result = await estudiantesService.Eliminar(estudianteIdToDelete);
+        result.OnSuccess(async () =>
         {
             toastService.ShowSuccess("Estudiante eliminado correctamente.");
-            ListaEstudiantes = await estudiantesService.GetList(p => true);
+            var listResult = await estudiantesService.GetList(p => true);
+            listResult.OnSuccess(est => ListaEstudiantes = est);
             estudiantesQueryable = ListaEstudiantes.AsQueryable();
-        }
-        else
-        {
-            toastService.ShowError("No se pudo eliminar el estudiante.");
-        }
+        });
+        result.OnFailure(() => toastService.ShowError("No se pudo eliminar el estudiante."));
     }
 }
