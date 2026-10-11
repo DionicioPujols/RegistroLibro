@@ -49,31 +49,12 @@
                     </TemplateColumn>
                     <TemplateColumn Title="Opciones" Align="Align.Center">
                         <a href="/Prestamo/Edit/@context.PrestamoId" class="btn btn-outline-primary"><i class="bi bi-pencil-square"></i></a>
-                        <button type="button" class="btn btn-outline-danger ms-2" data-bs-toggle="modal" data-bs-target="#deleteModal" @onclick="() => prestamoIdToDelete = context.PrestamoId"><i class="bi bi-trash"></i></button>
                     </TemplateColumn>
                 </QuickGrid>
             </div>
         </div>
         <div class="card-footer d-flex justify-content-between align-items-center">
             <label class="mb-0">Cantidad:  @ListaPrestamos.Count()</label>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="deleteModalLabel">Confirmar Eliminación</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                ¿Está seguro de que desea eliminar este préstamo?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" @onclick="EliminarPrestamo">Eliminar</button>
-            </div>
         </div>
     </div>
 </div>
