@@ -1,34 +1,30 @@
 @page "/Entrada/Create"
 
-@inject IEntradasService entradasService
+@inject EntradasService entradasService
 @inject LibrosService librosService
 @inject NavigationManager navigationManager
 @inject ToastService toastService
 
-<PageTitle>Registro de Entradas</PageTitle>
-
+<PageTitle>Crear Entrada</PageTitle>
 <EditForm Model="Entrada" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
 
     <div class="container">
         <div class="card shadow-lg">
             <div class="card-header text-center">
-                <h5 class="card-title">Registro de Entradas de Libros</h5>
+                <h5 class="card-title">Crear Entrada</h5>
             </div>
 
             <div class="card-body">
-                @* Entrada Id y Fecha *@
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label"><strong>Entrada Id:</strong></label>
-                        <div class="input-group">
-                            <InputNumber class="form-control" @bind-Value="Entrada.EntradaId" readonly />
-                            <button type="button" class="btn btn-outline-primary" @onclick="BuscarPorId" title="Buscar entrada"><i class="bi bi-search"></i></button>
-                        </div>
+                <div class="d-flex justify-content-between">
+                    @* EntradaId *@
+                    <div class="mb-3">
+                        <label class="form-label"><strong>EntradaId</strong></label>
+                        <InputNumber class="form-control" @bind-Value="Entrada.EntradaId" readonly />
                     </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label"><strong>Fecha:</strong></label>
+                    @* Fecha *@
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Fecha</strong></label>
                         <InputDate class="form-control" @bind-Value="Entrada.Fecha" />
                         <ValidationMessage For="@(() => Entrada.Fecha)" />
                     </div>
@@ -36,97 +32,61 @@
 
                 @* Concepto *@
                 <div class="mb-3">
-                    <label class="form-label"><strong>Concepto:</strong></label>
+                    <label class="form-label"><strong>Concepto</strong></label>
                     <InputText class="form-control" @bind-Value="Entrada.Concepto" placeholder="Ingrese el concepto de la entrada" />
                     <ValidationMessage For="@(() => Entrada.Concepto)" />
                 </div>
 
-                @* Sección de Detalles de la Entrada *@
-                <div class="border rounded p-3 mb-3">
-                    <h6 class="border-bottom pb-2 mb-3"><strong>Detalles de la entrada</strong></h6>
+                @* Detalles de la Entrada *@
+                <div class="border border-success p-3 mt-3">
+                    <h5>Detalles de la Entrada</h5>
 
-                    <div class="row align-items-end mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label"><strong>Libro:</strong></label>
-                            <InputSelect class="form-select" @bind-Value="SelectedLibroId">
-                                <option value="0" selected disabled>Seleccione un libro</option>
-                                @foreach (var libro in ListaLibros)
-                                {
-                                    <option value="@libro.LibroId">@libro.Titulo</option>
-                                }
-                            </InputSelect>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label"><strong>Cantidad:</strong></label>
-                            <InputNumber class="form-control" @bind-Value="Cantidad" placeholder="Cantidad recibida" min="1" />
-                        </div>
-
-                        <div class="col-md-2">
-                            <button type="button" class="btn btn-primary w-100" @onclick="AgregarDetalle">
-                                <i class="bi bi-plus"></i> Agregar
-                            </button>
-                        </div>
-                    </div>
-
-                    @* Tabla de Detalles *@
-                    <table class="table table-bordered table-striped mt-3">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Libro Id</th>
-                                <th>Título</th>
+                    <LibrosPicker Libros="ListaLibros"
+                                  LibroId="DetalleSeleccionado.LibroId"
+                                  Cantidad="DetalleSeleccionado.Cantidad"
+                                  OnLibroSelected="HandleLibroSelected" />
+                    <hr />
+                    <table class="table table-light">
+                        <thead class="table table-striped">
+                            <tr class="text-center">
+                                <th>Libro</th>
                                 <th>Cantidad</th>
-                                <th class="text-center">Acciones</th>
+                                <th>Remover</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            @if (Entrada.EntradasDetalle != null && Entrada.EntradasDetalle.Any())
-                            {
-                                @foreach (var detalle in Entrada.EntradasDetalle)
-                                {
-                                    <tr>
-                                        <td>@detalle.LibroId</td>
-                                        <td>@(detalle.Libro?.Titulo ?? ObtenerTituloLibro(detalle.LibroId))</td>
-                                        <td>@detalle.Cantidad</td>
-                                        <td class="text-center">
-                                            <button type="button" class="btn btn-outline-danger btn-sm" @onclick="() => EliminarDetalle(detalle)">
-                                                <i class="bi bi-trash"></i> Eliminar
-                                            </button>
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                            else
+                        <tbody class="text-center">
+                            @foreach (var detalle in Entrada.EntradasDetalle)
                             {
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted">No se ha agregado ningún libro al detalle.</td>
+                                    <td>@(detalle.Libro?.Titulo ?? ObtenerTituloLibro(detalle.LibroId))</td>
+                                    <td>@detalle.Cantidad</td>
+                                    <td>
+                                        <button type="button" class="btn btn-outline-danger bi bi-trash"
+                                                @onclick="() => RemoverDetalle(detalle)"></button>
+                                    </td>
                                 </tr>
                             }
                         </tbody>
                     </table>
+                    <hr />
+                </div>
 
-                    @* Total de Libros *@
-                    <div class="row justify-content-end mt-2">
-                        <div class="col-md-4">
-                            <label class="form-label"><strong>Total Libros:</strong></label>
-                            <InputNumber class="form-control text-end fw-bold" @bind-Value="Entrada.Total" readonly />
+                @* Total *@
+                <div class="row mt-2">
+                    <div class="col-6 offset-6">
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Total de Libros</strong></label>
+                            <label class="form-control text-end"><strong>@Entrada.Total</strong></label>
                             <ValidationMessage For="@(() => Entrada.Total)" />
                         </div>
                     </div>
                 </div>
             </div>
 
-            @* Botones del Footer *@
-            <div class="card-footer d-flex justify-content-center gap-2 py-3">
-                <a href="/Entrada/Index" class="btn btn-outline-secondary">
-                    <span class="bi bi-arrow-left"></span> Volver
-                </a>
-                <button type="button" class="btn btn-outline-primary" @onclick="Nuevo">
-                    <i class="bi bi-file-earmark-plus"></i> Nuevo
-                </button>
-                <button type="submit" class="btn btn-outline-success">
-                    <i class="bi bi-floppy"></i> Guardar
-                </button>
+            @* footer *@
+            <div class="card-footer text-center mt-2">
+                <a href="/Entrada/Index" class="btn btn-secondary"> <span class="bi bi-arrow-left"></span> Volver</a>
+                <button type="submit" class="btn btn-primary bi bi-floppy"> Guardar</button>
             </div>
         </div>
     </div>
@@ -134,118 +94,72 @@
 
 @code {
     public Entradas Entrada { get; set; } = new Entradas();
-    public List<Libros> ListaLibros { get; set; } = new List<Libros>();
-
-    public int SelectedLibroId { get; set; }
-    public int Cantidad { get; set; }
+    public EntradasDetalle DetalleSeleccionado { get; set; } = new();
+    public List<Libros> ListaLibros { get; set; } = [];
 
     protected override async Task OnInitializedAsync()
     {
         var result = await librosService.GetList(l => true);
         result.OnSuccess(lista => ListaLibros = lista);
+        Entrada.Fecha = DateTime.Now;
+        DetalleSeleccionado.Cantidad = 1;
     }
 
-    private void AgregarDetalle()
+    private async Task HandleLibroSelected((Libros libro, int cantidad) selection)
     {
-        if (SelectedLibroId <= 0)
+        var yaExiste = Entrada.EntradasDetalle.FirstOrDefault(l => l.LibroId == selection.libro.LibroId);
+        if (yaExiste != null)
         {
-            toastService.ShowWarning("Debe seleccionar un libro.");
-            return;
+            yaExiste.Cantidad += selection.cantidad;
         }
-
-        if (Cantidad <= 0)
+        else
         {
-            toastService.ShowWarning("La cantidad debe ser mayor que cero.");
-            return;
+            var detalle = new EntradasDetalle
+            {
+                LibroId = selection.libro.LibroId,
+                Cantidad = selection.cantidad,
+                Libro = selection.libro
+            };
+            Entrada.EntradasDetalle.Add(detalle);
         }
-
-        var libro = ListaLibros.FirstOrDefault(l => l.LibroId == SelectedLibroId);
-        if (libro == null)
-        {
-            toastService.ShowError("El libro seleccionado no es válido.");
-            return;
-        }
-
-        // Regla: En esta primera versión, permitir registrar un solo libro diferente por entrada.
-        // Si el usuario cambia el libro seleccionado antes de guardar, reemplazar la selección anterior.
-        Entrada.EntradasDetalle.Clear();
-
-        Entrada.EntradasDetalle.Add(new EntradasDetalle
-        {
-            LibroId = SelectedLibroId,
-            Cantidad = Cantidad,
-            Libro = libro
-        });
 
         Entrada.Total = Entrada.EntradasDetalle.Sum(d => d.Cantidad);
-        toastService.ShowSuccess("Detalle agregado.");
-    }
-
-    private void EliminarDetalle(EntradasDetalle detalle)
-    {
-        Entrada.EntradasDetalle.Remove(detalle);
-        Entrada.Total = Entrada.EntradasDetalle.Sum(d => d.Cantidad);
-        SelectedLibroId = 0;
-        Cantidad = 0;
+        DetalleSeleccionado = new EntradasDetalle { Cantidad = 1 };
+        await Task.CompletedTask;
     }
 
     public async Task Guardar()
     {
-        Entrada.Concepto = Entrada.Concepto?.Trim();
-
         if (string.IsNullOrWhiteSpace(Entrada.Concepto))
         {
             toastService.ShowWarning("El concepto es obligatorio.");
             return;
         }
 
-        // Si el usuario seleccionó un libro y especificó cantidad pero no presionó "Agregar", lo agregamos automáticamente
         if (Entrada.EntradasDetalle == null || !Entrada.EntradasDetalle.Any())
         {
-            if (SelectedLibroId > 0 && Cantidad > 0)
-            {
-                AgregarDetalle();
-            }
-            else
-            {
-                toastService.ShowWarning("Debe agregar al menos un libro en el detalle de la entrada.");
-                return;
-            }
+            toastService.ShowWarning("Debe agregar al menos un libro en el detalle de la entrada.");
+            return;
         }
 
         var result = await entradasService.Guardar(Entrada);
-        if (result.IsSuccess)
+        result.OnSuccess(() =>
         {
             toastService.ShowSuccess("Entrada guardada correctamente.");
             navigationManager.NavigateTo("/Entrada/Index");
-        }
-        else
-        {
-            toastService.ShowError(result.Error.Description);
-        }
+        });
+        result.OnFailure(() => toastService.ShowError("No se pudo guardar la entrada."));
     }
 
-    public void Nuevo()
+    public void RemoverDetalle(EntradasDetalle detalle)
     {
-        Entrada = new Entradas();
-        SelectedLibroId = 0;
-        Cantidad = 0;
+        Entrada.EntradasDetalle.Remove(detalle);
+        Entrada.Total = Entrada.EntradasDetalle.Sum(d => d.Cantidad);
+        DetalleSeleccionado = detalle;
     }
 
     private string ObtenerTituloLibro(int libroId)
     {
         return ListaLibros.FirstOrDefault(l => l.LibroId == libroId)?.Titulo ?? $"Libro #{libroId}";
-    }
-
-    private void BuscarPorId()
-    {
-        if (Entrada.EntradaId > 0)
-        {
-            navigationManager.NavigateTo($"/Entrada/Edit/{Entrada.EntradaId}");
-        }
-        else
-        {
-            toastService.ShowWarning("Para buscar una entrada, acceda desde la consulta o ingrese a modificar.");
-        }
     }
 }

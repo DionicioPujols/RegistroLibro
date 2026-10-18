@@ -1,244 +1,148 @@
 @page "/Entrada/Edit/{EntradaId:int}"
 
-@inject IEntradasService entradasService
+@inject EntradasService entradasService
 @inject LibrosService librosService
 @inject NavigationManager navigationManager
 @inject ToastService toastService
 
-<PageTitle>Modificar Entrada</PageTitle>
-
+<PageTitle>Editar Entrada</PageTitle>
 <EditForm Model="Entrada" OnValidSubmit="Modificar">
     <DataAnnotationsValidator />
 
     <div class="container">
         <div class="card shadow-lg">
             <div class="card-header text-center">
-                <h5 class="card-title">Modificar Entrada de Libros</h5>
+                <h5 class="card-title">Editar Entrada</h5>
             </div>
 
             <div class="card-body">
-                @* Entrada Id y Fecha *@
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label"><strong>Entrada Id:</strong></label>
-                        <div class="input-group">
-                            <InputNumber class="form-control" @bind-Value="Entrada.EntradaId" readonly />
-                            <span class="input-group-text"><i class="bi bi-hash"></i></span>
-                        </div>
+                <div class="d-flex justify-content-between">
+                    @* EntradaId *@
+                    <div class="mb-3">
+                        <label class="form-label"><strong>EntradaId</strong></label>
+                        <InputNumber class="form-control" @bind-Value="Entrada.EntradaId" readonly />
                     </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label"><strong>Fecha:</strong></label>
-                        <InputDate class="form-control" @bind-Value="Entrada.Fecha" />
+                    @* Fecha *@
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Fecha</strong></label>
+                        <InputDate class="form-control" @bind-Value="Entrada.Fecha"></InputDate>
                         <ValidationMessage For="@(() => Entrada.Fecha)" />
                     </div>
                 </div>
 
                 @* Concepto *@
                 <div class="mb-3">
-                    <label class="form-label"><strong>Concepto:</strong></label>
-                    <InputText class="form-control" @bind-Value="Entrada.Concepto" placeholder="Ingrese el concepto de la entrada" />
+                    <label class="form-label"><strong>Concepto</strong></label>
+                    <InputText class="form-control" @bind-Value="Entrada.Concepto" />
                     <ValidationMessage For="@(() => Entrada.Concepto)" />
                 </div>
 
-                @* Sección de Detalles de la Entrada *@
-                <div class="border rounded p-3 mb-3">
-                    <h6 class="border-bottom pb-2 mb-3"><strong>Detalles de la entrada</strong></h6>
+                @* Detalles de la Entrada *@
+                <div class="border border-success p-3 mt-3">
+                    <h5>Detalles de la Entrada</h5>
 
-                    <div class="row align-items-end mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label"><strong>Libro:</strong></label>
-                            <InputSelect class="form-select" @bind-Value="SelectedLibroId">
-                                <option value="0" selected disabled>Seleccione un libro</option>
-                                @foreach (var libro in ListaLibros)
-                                {
-                                    <option value="@libro.LibroId">@libro.Titulo</option>
-                                }
-                            </InputSelect>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label"><strong>Cantidad:</strong></label>
-                            <InputNumber class="form-control" @bind-Value="Cantidad" placeholder="Cantidad recibida" min="1" />
-                        </div>
-
-                        <div class="col-md-2">
-                            <button type="button" class="btn btn-primary w-100" @onclick="AgregarDetalle">
-                                <i class="bi bi-plus"></i> Agregar
-                            </button>
-                        </div>
-                    </div>
-
-                    @* Tabla de Detalles *@
-                    <table class="table table-bordered table-striped mt-3">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Libro Id</th>
-                                <th>Título</th>
+                    <LibrosPicker Libros="ListaLibros"
+                                  LibroId="DetalleSeleccionado.LibroId"
+                                  Cantidad="DetalleSeleccionado.Cantidad"
+                                  OnLibroSelected="HandleLibroSelected" />
+                    <hr />
+                    <table class="table table-light">
+                        <thead class="table table-striped">
+                            <tr class="text-center">
+                                <th>Libro</th>
                                 <th>Cantidad</th>
-                                <th class="text-center">Acciones</th>
+                                <th>Remover</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            @if (Entrada.EntradasDetalle != null && Entrada.EntradasDetalle.Any())
-                            {
-                                @foreach (var detalle in Entrada.EntradasDetalle)
-                                {
-                                    <tr>
-                                        <td>@detalle.LibroId</td>
-                                        <td>@(detalle.Libro?.Titulo ?? ObtenerTituloLibro(detalle.LibroId))</td>
-                                        <td>@detalle.Cantidad</td>
-                                        <td class="text-center">
-                                            <button type="button" class="btn btn-outline-danger btn-sm" @onclick="() => EliminarDetalle(detalle)">
-                                                <i class="bi bi-trash"></i> Eliminar
-                                            </button>
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                            else
+                        <tbody class="text-center">
+                            @foreach (var detalle in Entrada.EntradasDetalle)
                             {
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted">No se ha agregado ningún libro al detalle.</td>
+                                    <td>@(detalle.Libro?.Titulo ?? ObtenerTituloLibro(detalle.LibroId))</td>
+                                    <td>@detalle.Cantidad</td>
+                                    <td>
+                                        <button type="button" class="btn btn-outline-danger bi bi-trash"
+                                                @onclick="() => RemoverDetalle(detalle)">
+                                        </button>
+                                    </td>
                                 </tr>
                             }
                         </tbody>
                     </table>
+                    <hr />
+                </div>
 
-                    @* Total de Libros *@
-                    <div class="row justify-content-end mt-2">
-                        <div class="col-md-4">
-                            <label class="form-label"><strong>Total Libros:</strong></label>
-                            <InputNumber class="form-control text-end fw-bold" @bind-Value="Entrada.Total" readonly />
+                @* Total *@
+                <div class="row mt-2">
+                    <div class="col-6 offset-6">
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Total de Libros</strong></label>
+                            <label class="form-control text-end"><strong>@Entrada.Total</strong></label>
                             <ValidationMessage For="@(() => Entrada.Total)" />
                         </div>
                     </div>
                 </div>
             </div>
 
-            @* Botones del Footer *@
-            <div class="card-footer d-flex justify-content-center gap-2 py-3">
-                <a href="/Entrada/Index" class="btn btn-outline-secondary">
-                    <span class="bi bi-arrow-left"></span> Volver
-                </a>
-                <a href="/Entrada/Create" class="btn btn-outline-primary">
-                    <i class="bi bi-file-earmark-plus"></i> Nuevo
-                </a>
-                <button type="submit" class="btn btn-outline-success">
-                    <i class="bi bi-floppy"></i> Guardar
-                </button>
-                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                    <i class="bi bi-trash"></i> Eliminar
-                </button>
+            @* footer *@
+            <div class="card-footer text-center mt-2">
+                <a href="/Entrada/Index" class="btn btn-secondary"> <span class="bi bi-arrow-left"></span> Volver</a>
+                <button type="submit" class="btn btn-primary bi bi-floppy"> Guardar</button>
             </div>
         </div>
     </div>
 </EditForm>
-
-@* Modal de confirmación para eliminar *@
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel">Confirmar Eliminación</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                ¿Está seguro de que desea eliminar la entrada #@EntradaId con sus detalles correspondientes?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" @onclick="EliminarEntrada">Eliminar</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 @code {
     [Parameter]
     public int EntradaId { get; set; }
 
     public Entradas Entrada { get; set; } = new Entradas();
-    public List<Libros> ListaLibros { get; set; } = new List<Libros>();
-
-    public int SelectedLibroId { get; set; }
-    public int Cantidad { get; set; }
+    public EntradasDetalle DetalleSeleccionado { get; set; } = new();
+    public List<Libros> ListaLibros { get; set; } = [];
 
     protected override async Task OnInitializedAsync()
     {
-        var librosResult = await librosService.GetList(l => true);
-        librosResult.OnSuccess(lista => ListaLibros = lista);
+        var resultLibros = await librosService.GetList(l => true);
+        resultLibros.OnSuccess(lista => ListaLibros = lista);
 
-        var entradaResult = await entradasService.Buscar(EntradaId);
-        entradaResult.OnSuccess(entrada =>
+        var resultEntrada = await entradasService.Buscar(EntradaId);
+        resultEntrada.OnSuccess(e =>
         {
-            if (entrada != null)
-            {
-                Entrada = entrada;
-                var primerDetalle = Entrada.EntradasDetalle.FirstOrDefault();
-                if (primerDetalle != null)
-                {
-                    SelectedLibroId = primerDetalle.LibroId;
-                    Cantidad = primerDetalle.Cantidad;
-                }
-            }
-            else
-            {
-                toastService.ShowError("Entrada no encontrada.");
-                navigationManager.NavigateTo("/Entrada/Index");
-            }
-        });
-    }
-
-    private void AgregarDetalle()
-    {
-        if (SelectedLibroId <= 0)
-        {
-            toastService.ShowWarning("Debe seleccionar un libro.");
-            return;
-        }
-
-        if (Cantidad <= 0)
-        {
-            toastService.ShowWarning("La cantidad debe ser mayor que cero.");
-            return;
-        }
-
-        var libro = ListaLibros.FirstOrDefault(l => l.LibroId == SelectedLibroId);
-        if (libro == null)
-        {
-            toastService.ShowError("El libro seleccionado no es válido.");
-            return;
-        }
-
-        // Regla: En esta primera versión, permitir registrar un solo libro diferente por entrada.
-        // Si el usuario cambia el libro seleccionado antes de guardar, reemplazar la selección anterior.
-        Entrada.EntradasDetalle.Clear();
-
-        Entrada.EntradasDetalle.Add(new EntradasDetalle
-        {
-            EntradaId = Entrada.EntradaId,
-            LibroId = SelectedLibroId,
-            Cantidad = Cantidad,
-            Libro = libro
+            if (e != null)
+                Entrada = e;
         });
 
-        Entrada.Total = Entrada.EntradasDetalle.Sum(d => d.Cantidad);
-        toastService.ShowSuccess("Detalle actualizado.");
+        DetalleSeleccionado.Cantidad = 1;
     }
 
-    private void EliminarDetalle(EntradasDetalle detalle)
+    private async Task HandleLibroSelected((Libros libro, int cantidad) selection)
     {
-        Entrada.EntradasDetalle.Remove(detalle);
+        var yaExiste = Entrada.EntradasDetalle.FirstOrDefault(l => l.LibroId == selection.libro.LibroId);
+        if (yaExiste != null)
+        {
+            yaExiste.Cantidad += selection.cantidad;
+        }
+        else
+        {
+            var detalle = new EntradasDetalle
+            {
+                EntradaId = Entrada.EntradaId,
+                LibroId = selection.libro.LibroId,
+                Cantidad = selection.cantidad,
+                Libro = selection.libro
+            };
+            Entrada.EntradasDetalle.Add(detalle);
+        }
+
         Entrada.Total = Entrada.EntradasDetalle.Sum(d => d.Cantidad);
-        SelectedLibroId = 0;
-        Cantidad = 0;
+        DetalleSeleccionado = new EntradasDetalle { Cantidad = 1 };
+        await Task.CompletedTask;
     }
 
     public async Task Modificar()
     {
-        Entrada.Concepto = Entrada.Concepto?.Trim();
-
         if (string.IsNullOrWhiteSpace(Entrada.Concepto))
         {
             toastService.ShowWarning("El concepto es obligatorio.");
@@ -247,41 +151,24 @@
 
         if (Entrada.EntradasDetalle == null || !Entrada.EntradasDetalle.Any())
         {
-            if (SelectedLibroId > 0 && Cantidad > 0)
-            {
-                AgregarDetalle();
-            }
-            else
-            {
-                toastService.ShowWarning("Debe agregar al menos un libro en el detalle de la entrada.");
-                return;
-            }
+            toastService.ShowWarning("Debe agregar al menos un libro en el detalle de la entrada.");
+            return;
         }
 
         var result = await entradasService.Guardar(Entrada);
-        if (result.IsSuccess)
+        result.OnSuccess(() =>
         {
-            toastService.ShowSuccess("Entrada modificada correctamente.");
+            toastService.ShowSuccess("Se ha modificado correctamente");
             navigationManager.NavigateTo("/Entrada/Index");
-        }
-        else
-        {
-            toastService.ShowError(result.Error.Description);
-        }
+        });
+        result.OnFailure(() => toastService.ShowError("No se ha podido modificar correctamente"));
     }
 
-    private async Task EliminarEntrada()
+    public void RemoverDetalle(EntradasDetalle detalle)
     {
-        var result = await entradasService.Eliminar(EntradaId);
-        if (result.IsSuccess)
-        {
-            toastService.ShowSuccess("Entrada eliminada correctamente.");
-            navigationManager.NavigateTo("/Entrada/Index");
-        }
-        else
-        {
-            toastService.ShowError(result.Error.Description);
-        }
+        Entrada.EntradasDetalle.Remove(detalle);
+        Entrada.Total = Entrada.EntradasDetalle.Sum(d => d.Cantidad);
+        DetalleSeleccionado = detalle;
     }
 
     private string ObtenerTituloLibro(int libroId)

@@ -4,11 +4,12 @@ using System.Linq.Expressions;
 
 namespace RegistroLibro.Services;
 
-public interface IEntradasService : IServiceResult<Entradas, int>
+public interface IEntradasService
 {
+    Task<Result> Guardar(Entradas entrada);
+    Task<Result<Entradas?>> Buscar(int entradaId);
+    Task<Result> Eliminar(int entradaId);
+    Task<Result<List<Entradas>>> GetList(Expression<Func<Entradas, bool>> criterio);
+    Task<List<Entradas>> Listar(Expression<Func<Entradas, bool>> criterio);
     Task<bool> Existe(int entradaId);
-    Task<Result> Insertar(Entradas entrada);
-    Task<Result> Modificar(Entradas entrada);
-    Task<Result> Validar(Entradas entrada);
-    Task<List<EntradasDetalle>> GetDetalles(int entradaId);
 }

@@ -1,41 +1,65 @@
 @page "/Entrada/Index"
 
-@inject IEntradasService entradasService
+@inject EntradasService entradasService
+@inject NavigationManager navigationManager
 @inject ToastService toastService
 
 <PageTitle>Registro de Entradas</PageTitle>
-
 <div class="container">
     <div class="card shadow-lg">
-        <div class="card-header d-flex justify-content-between align-items-center mb-2">
-            <h5 class="card-title mb-0">Registro de Entradas</h5>
-            <a href="/Entrada/Create" class="btn btn-primary"><i class="bi bi-plus-square me-1"></i> Crear</a>
+        <div class="card-header d-flex justify-content-between align-center mb-4">
+            <h5 class="card-title">Registro de Entradas</h5>
+            <a href="/Entrada/Create" class="btn btn-primary">
+                <span class="bi bi-plus-square mt-3"></span> Crear
+            </a>
         </div>
 
-        @* Controles de búsqueda *@
         <div class="card-body">
-            <div class="row mb-2">
-                <div class="col-md-3">
+            @*labels*@
+            <div class="row">
+                <div class="col-3">
                     <label class="col-form-label"><strong>Filtrar por</strong></label>
                 </div>
-                <div class="col-md-4">
-                    <label class="col-form-label"><strong>Búsqueda</strong></label>
+                <div class="col-4">
+                    <label class="col-form-label"><strong>B&uacute;squeda</strong></label>
                 </div>
             </div>
-            <div class="row align-items-center mb-3">
-                <div class="col-md-3">
+
+            @*Inputs y botones*@
+            <div class="row align-items-center">
+                <div class="col-3">
                     <InputSelect class="form-select" @bind-Value="Filtro">
-                        <option value="" selected disabled>Elija una opción</option>
-                        <option value="ID">ID</option>
+                        <option value="" selected disabled>Elija una opci&oacute;n</option>
                         <option value="Concepto">Concepto</option>
-                        <option value="Libro">Libro</option>
+                        <option value="Fecha">Fecha</option>
                     </InputSelect>
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-4">
                     <div class="input-group">
-                        <input class="form-control" @bind="ValorFiltro" placeholder="Buscar..." />
-                        <button type="button" class="btn btn-outline-primary" @onclick="Buscar"><i class="bi bi-search"></i></button>
+                        <input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
+                        <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+                    </div>
+                </div>
+
+                <div class="col-3">
+                    <button type="button" class="btn btn-outline-secondary bi bi-arrow-counterclockwise"
+                            @onclick="Restablecer">
+                    </button>
+                </div>
+
+                @*FiltroFecha*@
+                <div class="row mt-3">
+                    <div class="col-3">
+                        <label class="col-form-label"><strong>Desde</strong></label>
+                        <InputDate class="form-control" @bind-Value="Desde"></InputDate>
+                    </div>
+
+                    <div class="col-3">
+                        <label class="col-form-label"><strong>Hasta</strong></label>
+                        <div class="input-group">
+                            <InputDate class="form-control" @bind-Value="Hasta"></InputDate>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -45,75 +69,23 @@
                     <PropertyColumn Property="@(e => e.EntradaId)" Title="EntradaId" Sortable="true" />
                     <PropertyColumn Property="@(e => e.Fecha)" Title="Fecha" Format="dd/MM/yyyy" Sortable="true" />
                     <PropertyColumn Property="@(e => e.Concepto)" Title="Concepto" Sortable="true" />
-                    <TemplateColumn Title="Libro">
-                        @context.EntradasDetalle.FirstOrDefault()?.Libro?.Titulo
-                    </TemplateColumn>
-                    <PropertyColumn Property="@(e => e.Total)" Title="Total" Sortable="true" />
+                    <PropertyColumn Property="@(e => e.Total)" Title="Total Libros" Sortable="true" />
                     <TemplateColumn Title="Opciones" Align="Align.Center">
-                        <button type="button" class="btn btn-outline-info me-1" title="Ver detalle" @onclick="() => MostrarDetalle(context)" data-bs-toggle="modal" data-bs-target="#detalleModal">
-                            <i class="bi bi-eye"></i>
-                        </button>
                         <a href="/Entrada/Edit/@context.EntradaId" class="btn btn-outline-primary" title="Editar">
                             <i class="bi bi-pencil-square"></i>
                         </a>
+                        <button type="button" class="btn btn-outline-danger ms-1" title="Eliminar"
+                                @onclick="() => Eliminar(context.EntradaId)">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </TemplateColumn>
                 </QuickGrid>
             </div>
         </div>
-
-        <div class="card-footer d-flex justify-content-between align-items-center">
-            <label class="mb-0">Cantidad de Entradas: @ListaEntradas.Count()</label>
-        </div>
-    </div>
-</div>
-
-@* Modal para visualizar el detalle *@
-<div class="modal fade" id="detalleModal" tabindex="-1" aria-labelledby="detalleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="detalleModalLabel">Detalle de la Entrada #@EntradaSeleccionada?.EntradaId</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                @if (EntradaSeleccionada != null)
-                {
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <p><strong>Fecha:</strong> @EntradaSeleccionada.Fecha.ToString("dd/MM/yyyy")</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Total Libros:</strong> @EntradaSeleccionada.Total</p>
-                        </div>
-                        <div class="col-12">
-                            <p><strong>Concepto:</strong> @EntradaSeleccionada.Concepto</p>
-                        </div>
-                    </div>
-
-                    <h6><strong>Libros Registrados:</strong></h6>
-                    <table class="table table-bordered table-striped">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Libro Id</th>
-                                <th>Título</th>
-                                <th>Cantidad</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var detalle in EntradaSeleccionada.EntradasDetalle)
-                            {
-                                <tr>
-                                    <td>@detalle.LibroId</td>
-                                    <td>@detalle.Libro?.Titulo</td>
-                                    <td>@detalle.Cantidad</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                }
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <div class="card-footer d-flex justify-content-between align-center mb-4">
+            <label class="ms-3"><strong>Cantidad:</strong> @ListaEntradas.Count</label>
+            <div class="col-5">
+                <label class="ms-5"><strong>Total de Libros:</strong> @ListaEntradas.Sum(p => p.Total)</label>
             </div>
         </div>
     </div>
@@ -126,7 +98,8 @@
     public string Filtro { get; set; } = string.Empty;
     public string ValorFiltro { get; set; } = string.Empty;
 
-    public Entradas? EntradaSeleccionada { get; set; }
+    public DateTime? Desde { get; set; }
+    public DateTime? Hasta { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -135,34 +108,23 @@
 
     private async Task CargarEntradas()
     {
-        var result = await entradasService.GetList(e => true);
-        result.OnSuccess(lista => ListaEntradas = lista);
+        ListaEntradas = await entradasService.Listar(e => true);
         entradasQueryable = ListaEntradas.AsQueryable();
+        Desde = null;
+        Hasta = null;
     }
 
     private async Task Buscar()
     {
-        if (!string.IsNullOrWhiteSpace(ValorFiltro))
+        if (Filtro == "Fecha" && Desde.HasValue && Hasta.HasValue)
         {
-            if (Filtro == "ID" && int.TryParse(ValorFiltro, out int id))
-            {
-                var result = await entradasService.GetList(e => e.EntradaId == id);
-                result.OnSuccess(lista => ListaEntradas = lista);
-            }
-            else if (Filtro == "Concepto")
-            {
-                var result = await entradasService.GetList(e => e.Concepto != null && e.Concepto.ToLower().Contains(ValorFiltro.ToLower()));
-                result.OnSuccess(lista => ListaEntradas = lista);
-            }
-            else if (Filtro == "Libro")
-            {
-                var result = await entradasService.GetList(e => e.EntradasDetalle.Any(d => d.Libro != null && d.Libro.Titulo != null && d.Libro.Titulo.ToLower().Contains(ValorFiltro.ToLower())));
-                result.OnSuccess(lista => ListaEntradas = lista);
-            }
-            else
-            {
-                await CargarEntradas();
-            }
+            ListaEntradas = await entradasService
+                .Listar(f => f.Fecha >= Desde.Value && f.Fecha <= Hasta.Value);
+        }
+        else if (Filtro == "Concepto" && !string.IsNullOrWhiteSpace(ValorFiltro))
+        {
+            ListaEntradas = await entradasService
+                .Listar(p => p.Concepto != null && p.Concepto.ToLower().Contains(ValorFiltro.ToLower()));
         }
         else
         {
@@ -172,8 +134,21 @@
         entradasQueryable = ListaEntradas.AsQueryable();
     }
 
-    private void MostrarDetalle(Entradas entrada)
+    private async Task Restablecer()
     {
-        EntradaSeleccionada = entrada;
+        await CargarEntradas();
+        Filtro = string.Empty;
+        ValorFiltro = string.Empty;
+    }
+
+    private async Task Eliminar(int entradaId)
+    {
+        var result = await entradasService.Eliminar(entradaId);
+        result.OnSuccess(async () =>
+        {
+            toastService.ShowSuccess("Entrada eliminada correctamente");
+            await CargarEntradas();
+        });
+        result.OnFailure(() => toastService.ShowError("No se pudo eliminar la entrada"));
     }
 }
