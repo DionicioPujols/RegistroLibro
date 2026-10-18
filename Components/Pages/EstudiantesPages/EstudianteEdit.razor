@@ -90,12 +90,8 @@
     {
         Estudiante.nombre = Estudiante.nombre?.Trim();
 
-        var nombreExiste = await estudiantesService.GetList(e => e.nombre!.ToLower() == Estudiante.nombre!.ToLower() && e.EstudianteId != Estudiante.EstudianteId);
-
-        bool yaExiste = false;
-        nombreExiste.OnSuccess(lista => yaExiste = lista.Any());
-
-        if (yaExiste)
+        var nombreCambio = Estudiante.nombre?.ToLower() != NombreOriginal?.ToLower();
+        if (nombreCambio && await estudiantesService.ExisteNombre(Estudiante.nombre!.ToLower()))
         {
             toastService.ShowError("Ya existe otro estudiante registrado con este nombre.");
             return;

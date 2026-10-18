@@ -70,23 +70,24 @@
     public int LibroId { get; set; }
 
     public Libros Libro { get; set; } = new Libros();
+    private string? TituloOriginal;
 
     protected override async Task OnInitializedAsync()
     {
         var result = await gestionLibros.Buscar(LibroId);
-        result.OnSuccess(libro => Libro = libro ?? new Libros());
+        result.OnSuccess(libro => 
+        {
+            Libro = libro ?? new Libros();
+            TituloOriginal = Libro.Titulo;
+        });
     }
 
     public async Task Modificar()
     {
         Libro.Titulo = Libro.Titulo?.Trim();
 
-        var tituloExiste = await gestionLibros.GetList(l => l.Titulo!.ToLower() == Libro.Titulo!.ToLower() && l.LibroId != Libro.LibroId);
-
-        bool yaExiste = false;
-        tituloExiste.OnSuccess(lista => yaExiste = lista.Any());
-
-        if (yaExiste)
+        var tituloCambio = Libro.Titulo?.ToLower() != TituloOriginal?.ToLower();
+        if (tituloCambio && await gestionLibros.ExisteTitulo(Libro.Titulo!.ToLower()))
         {
             toastService.ShowError("Ya existe otro libro registrado con este título.");
             return;
