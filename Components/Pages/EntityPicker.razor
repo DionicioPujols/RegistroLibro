@@ -1,0 +1,51 @@
+@typeparam TEntity
+
+<div class="col-auto input-group align-items-center">
+    <label class="col-form-label input-group-text">Seleccione:</label>
+
+    <InputSelect class="form-control form-select" id="product-select" @bind-Value="SelectedEntity">
+        <option value="">-- Select a One --</option>
+        @foreach (var product in Entities)
+        {
+            <option value="@product">@GeTModelDisplay(product)</option>
+        }
+    </InputSelect>
+    <label class="col-form-label input-group-text">Valor:</label>
+    <InputNumber class="form-control" id="quantity-input" @bind-Value="Quantity" min="1" />
+
+    <button type="button" class="btn btn-primary" @onclick="TriggerSelection">Confirm</button>
+</div>
+
+@code {
+    [Parameter]
+    public List<TEntity> Entities { get; set; } = [];
+
+    [Parameter]
+    [EditorRequired]
+    public string DisplayMember { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback<(TEntity Entity, double Quantity)> OnEntitySelected { get; set; } // Event for selection
+
+    private TEntity? SelectedEntity { get; set; }
+    private int Quantity { get; set; } = 1;
+
+    // Method to display the entity, managed internally within the component
+    private string GeTModelDisplay(TEntity entity)
+    {
+        if (entity == null) return string.Empty;
+
+        var entityType = entity.GetType();
+        var nameProperty = entityType.GetProperty(DisplayMember);
+
+        return nameProperty?.GetValue(entity)?.ToString() ?? entity.ToString() ?? "";
+    }
+
+    private async Task TriggerSelection()
+    {
+        if (SelectedEntity != null)
+        {
+            await OnEntitySelected.InvokeAsync((SelectedEntity, Quantity));
+        }
+    }
+}

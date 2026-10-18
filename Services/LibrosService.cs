@@ -41,6 +41,7 @@ public class LibrosService(IDbContextFactory<Contexto>
     private async Task<bool> Insertar(Libros libro)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
+        libro.CantidadDisponible = 0;
         contexto.Libros.Add(libro);
         return await contexto
                 .SaveChangesAsync() > 0;

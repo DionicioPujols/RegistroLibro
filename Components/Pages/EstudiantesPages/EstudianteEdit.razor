@@ -79,11 +79,16 @@
     public int EstudianteId { get; set; }
 
     public Estudiantes Estudiante { get; set; } = new Estudiantes();
+    private string? NombreOriginal;
 
     protected override async Task OnInitializedAsync()
     {
         var result = await estudiantesService.Buscar(EstudianteId);
-        result.OnSuccess(est => Estudiante = est ?? new Estudiantes());
+        result.OnSuccess(est => 
+        {
+            Estudiante = est ?? new Estudiantes();
+            NombreOriginal = Estudiante.nombre;
+        });
     }
 
     public async Task Modificar()
