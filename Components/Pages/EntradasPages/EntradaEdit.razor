@@ -110,12 +110,13 @@
                         <div class="col-md-4">
                             <label class="form-label"><strong>Total Libros:</strong></label>
                             <InputNumber class="form-control text-end fw-bold" @bind-Value="Entrada.Total" readonly />
+                            <ValidationMessage For="@(() => Entrada.Total)" />
                         </div>
                     </div>
                 </div>
             </div>
 
-            @* Botones del Footer según el diseño *@
+            @* Botones del Footer *@
             <div class="card-footer d-flex justify-content-center gap-2 py-3">
                 <a href="/Entrada/Index" class="btn btn-outline-secondary">
                     <span class="bi bi-arrow-left"></span> Volver
@@ -193,13 +194,13 @@
     {
         if (SelectedLibroId <= 0)
         {
-            toastService.ShowError("Debe seleccionar un libro.");
+            toastService.ShowWarning("Debe seleccionar un libro.");
             return;
         }
 
         if (Cantidad <= 0)
         {
-            toastService.ShowError("La cantidad debe ser mayor a 0.");
+            toastService.ShowWarning("La cantidad debe ser mayor que cero.");
             return;
         }
 
@@ -222,7 +223,7 @@
             Libro = libro
         });
 
-        Entrada.Total = Cantidad;
+        Entrada.Total = Entrada.EntradasDetalle.Sum(d => d.Cantidad);
         toastService.ShowSuccess("Detalle actualizado.");
     }
 
@@ -240,11 +241,11 @@
 
         if (string.IsNullOrWhiteSpace(Entrada.Concepto))
         {
-            toastService.ShowError("El concepto es obligatorio.");
+            toastService.ShowWarning("El concepto es obligatorio.");
             return;
         }
 
-        if (!Entrada.EntradasDetalle.Any())
+        if (Entrada.EntradasDetalle == null || !Entrada.EntradasDetalle.Any())
         {
             if (SelectedLibroId > 0 && Cantidad > 0)
             {
@@ -252,29 +253,35 @@
             }
             else
             {
-                toastService.ShowError("Debe agregar al menos un libro en el detalle de la entrada.");
+                toastService.ShowWarning("Debe agregar al menos un libro en el detalle de la entrada.");
                 return;
             }
         }
 
         var result = await entradasService.Guardar(Entrada);
-        result.OnSuccess(() =>
+        if (result.IsSuccess)
         {
             toastService.ShowSuccess("Entrada modificada correctamente.");
             navigationManager.NavigateTo("/Entrada/Index");
-        });
-        result.OnFailure(() => toastService.ShowError("No se pudo modificar la entrada."));
+        }
+        else
+        {
+            toastService.ShowError(result.Error.Description);
+        }
     }
 
     private async Task EliminarEntrada()
     {
         var result = await entradasService.Eliminar(EntradaId);
-        result.OnSuccess(() =>
+        if (result.IsSuccess)
         {
             toastService.ShowSuccess("Entrada eliminada correctamente.");
             navigationManager.NavigateTo("/Entrada/Index");
-        });
-        result.OnFailure(() => toastService.ShowError("No se pudo eliminar la entrada."));
+        }
+        else
+        {
+            toastService.ShowError(result.Error.Description);
+        }
     }
 
     private string ObtenerTituloLibro(int libroId)

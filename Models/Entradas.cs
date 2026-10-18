@@ -14,6 +14,7 @@ public class Entradas
     [Required(ErrorMessage = "El concepto es obligatorio")]
     public string? Concepto { get; set; }
 
+    [Range(1, int.MaxValue, ErrorMessage = "El total de libros debe ser mayor a cero")]
     public int Total { get; set; }
 
     [InverseProperty("Entrada")]

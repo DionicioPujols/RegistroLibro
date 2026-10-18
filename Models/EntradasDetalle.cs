@@ -14,12 +14,12 @@ public class EntradasDetalle
     [InverseProperty("EntradasDetalle")]
     public virtual Entradas? Entrada { get; set; }
 
-    [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un libro")]
+    [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un libro válido")]
     public int LibroId { get; set; }
 
     [ForeignKey("LibroId")]
     public virtual Libros? Libro { get; set; }
 
-    [Range(1, int.MaxValue, ErrorMessage = "La cantidad debe ser mayor a 0")]
+    [Range(1, int.MaxValue, ErrorMessage = "La cantidad debe ser mayor a cero")]
     public int Cantidad { get; set; }
 }
