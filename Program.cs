@@ -18,6 +18,8 @@ builder.Services.AddScoped<EstudiantesService>();
 builder.Services.AddScoped<LibrosService>();
 builder.Services.AddScoped<PrestamosService>();
 builder.Services.AddScoped<DevolucionesService>();
+builder.Services.AddScoped<IEntradasService, EntradasService>();
+builder.Services.AddScoped<EntradasService>();
 
 builder.Services.AddBlazorBootstrap();
 
