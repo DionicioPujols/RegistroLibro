@@ -1,0 +1,247 @@
+@page "/Entrada/Create"
+
+@inject IEntradasService entradasService
+@inject LibrosService librosService
+@inject NavigationManager navigationManager
+@inject ToastService toastService
+
+<PageTitle>Registro de Entradas</PageTitle>
+
+<EditForm Model="Entrada" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h5 class="card-title">Registro de Entradas de Libros</h5>
+            </div>
+
+            <div class="card-body">
+                @* Entrada Id y Fecha *@
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label"><strong>Entrada Id:</strong></label>
+                        <div class="input-group">
+                            <InputNumber class="form-control" @bind-Value="Entrada.EntradaId" readonly />
+                            <button type="button" class="btn btn-outline-primary" @onclick="BuscarPorId" title="Buscar entrada"><i class="bi bi-search"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label"><strong>Fecha:</strong></label>
+                        <InputDate class="form-control" @bind-Value="Entrada.Fecha" />
+                        <ValidationMessage For="@(() => Entrada.Fecha)" />
+                    </div>
+                </div>
+
+                @* Concepto *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Concepto:</strong></label>
+                    <InputText class="form-control" @bind-Value="Entrada.Concepto" placeholder="Ingrese el concepto de la entrada" />
+                    <ValidationMessage For="@(() => Entrada.Concepto)" />
+                </div>
+
+                @* Sección de Detalles de la Entrada *@
+                <div class="border rounded p-3 mb-3">
+                    <h6 class="border-bottom pb-2 mb-3"><strong>Detalles de la entrada</strong></h6>
+
+                    <div class="row align-items-end mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label"><strong>Libro:</strong></label>
+                            <InputSelect class="form-select" @bind-Value="SelectedLibroId">
+                                <option value="0" selected disabled>Seleccione un libro</option>
+                                @foreach (var libro in ListaLibros)
+                                {
+                                    <option value="@libro.LibroId">@libro.Titulo</option>
+                                }
+                            </InputSelect>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label"><strong>Cantidad:</strong></label>
+                            <InputNumber class="form-control" @bind-Value="Cantidad" placeholder="Cantidad recibida" min="1" />
+                        </div>
+
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-primary w-100" @onclick="AgregarDetalle">
+                                <i class="bi bi-plus"></i> Agregar
+                            </button>
+                        </div>
+                    </div>
+
+                    @* Tabla de Detalles *@
+                    <table class="table table-bordered table-striped mt-3">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Libro Id</th>
+                                <th>Título</th>
+                                <th>Cantidad</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Entrada.EntradasDetalle != null && Entrada.EntradasDetalle.Any())
+                            {
+                                @foreach (var detalle in Entrada.EntradasDetalle)
+                                {
+                                    <tr>
+                                        <td>@detalle.LibroId</td>
+                                        <td>@(detalle.Libro?.Titulo ?? ObtenerTituloLibro(detalle.LibroId))</td>
+                                        <td>@detalle.Cantidad</td>
+                                        <td class="text-center">
+                                            <button type="button" class="btn btn-outline-danger btn-sm" @onclick="() => EliminarDetalle(detalle)">
+                                                <i class="bi bi-trash"></i> Eliminar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">No se ha agregado ningún libro al detalle.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    @* Total de Libros *@
+                    <div class="row justify-content-end mt-2">
+                        <div class="col-md-4">
+                            <label class="form-label"><strong>Total Libros:</strong></label>
+                            <InputNumber class="form-control text-end fw-bold" @bind-Value="Entrada.Total" readonly />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @* Botones del Footer según el diseño *@
+            <div class="card-footer d-flex justify-content-center gap-2 py-3">
+                <a href="/Entrada/Index" class="btn btn-outline-secondary">
+                    <span class="bi bi-arrow-left"></span> Volver
+                </a>
+                <button type="button" class="btn btn-outline-primary" @onclick="Nuevo">
+                    <i class="bi bi-file-earmark-plus"></i> Nuevo
+                </button>
+                <button type="submit" class="btn btn-outline-success">
+                    <i class="bi bi-floppy"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    public Entradas Entrada { get; set; } = new Entradas();
+    public List<Libros> ListaLibros { get; set; } = new List<Libros>();
+
+    public int SelectedLibroId { get; set; }
+    public int Cantidad { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await librosService.GetList(l => true);
+        result.OnSuccess(lista => ListaLibros = lista);
+    }
+
+    private void AgregarDetalle()
+    {
+        if (SelectedLibroId <= 0)
+        {
+            toastService.ShowError("Debe seleccionar un libro.");
+            return;
+        }
+
+        if (Cantidad <= 0)
+        {
+            toastService.ShowError("La cantidad debe ser mayor a 0.");
+            return;
+        }
+
+        var libro = ListaLibros.FirstOrDefault(l => l.LibroId == SelectedLibroId);
+        if (libro == null)
+        {
+            toastService.ShowError("El libro seleccionado no es válido.");
+            return;
+        }
+
+        // Regla: En esta primera versión, permitir registrar un solo libro diferente por entrada.
+        // Si el usuario cambia el libro seleccionado antes de guardar, reemplazar la selección anterior.
+        Entrada.EntradasDetalle.Clear();
+
+        Entrada.EntradasDetalle.Add(new EntradasDetalle
+        {
+            LibroId = SelectedLibroId,
+            Cantidad = Cantidad,
+            Libro = libro
+        });
+
+        Entrada.Total = Cantidad;
+        toastService.ShowSuccess("Detalle agregado.");
+    }
+
+    private void EliminarDetalle(EntradasDetalle detalle)
+    {
+        Entrada.EntradasDetalle.Remove(detalle);
+        Entrada.Total = Entrada.EntradasDetalle.Sum(d => d.Cantidad);
+        SelectedLibroId = 0;
+        Cantidad = 0;
+    }
+
+    public async Task Guardar()
+    {
+        Entrada.Concepto = Entrada.Concepto?.Trim();
+
+        if (string.IsNullOrWhiteSpace(Entrada.Concepto))
+        {
+            toastService.ShowError("El concepto es obligatorio.");
+            return;
+        }
+
+        // Si el usuario seleccionó un libro y especificó cantidad pero no presionó "Agregar", lo agregamos automáticamente
+        if (!Entrada.EntradasDetalle.Any())
+        {
+            if (SelectedLibroId > 0 && Cantidad > 0)
+            {
+                AgregarDetalle();
+            }
+            else
+            {
+                toastService.ShowError("Debe agregar al menos un libro en el detalle de la entrada.");
+                return;
+            }
+        }
+
+        var result = await entradasService.Guardar(Entrada);
+        result.OnSuccess(() =>
+        {
+            toastService.ShowSuccess("Entrada guardada correctamente.");
+            navigationManager.NavigateTo("/Entrada/Index");
+        });
+        result.OnFailure(() => toastService.ShowError("No se pudo guardar la entrada."));
+    }
+
+    public void Nuevo()
+    {
+        Entrada = new Entradas();
+        SelectedLibroId = 0;
+        Cantidad = 0;
+    }
+
+    private string ObtenerTituloLibro(int libroId)
+    {
+        return ListaLibros.FirstOrDefault(l => l.LibroId == libroId)?.Titulo ?? $"Libro #{libroId}";
+    }
+
+    private void BuscarPorId()
+    {
+        if (Entrada.EntradaId > 0)
+        {
+            navigationManager.NavigateTo($"/Entrada/Edit/{Entrada.EntradaId}");
+        }
+        else
+        {
+            toastService.ShowWarning("Para buscar una entrada, acceda desde la consulta o ingrese a modificar.");
+        }
+    }
+}
