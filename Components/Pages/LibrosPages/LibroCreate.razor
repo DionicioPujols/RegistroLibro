@@ -53,12 +53,9 @@
     {
         Libro.Titulo = Libro.Titulo?.Trim();
 
-        var tituloExiste = await gestionLibros.GetList(l => l.Titulo!.ToLower() == Libro.Titulo!.ToLower());
-        
-        bool yaExiste = false;
-        tituloExiste.OnSuccess(lista => yaExiste = lista.Any());
+        var tituloExiste = await gestionLibros.ExisteTitulo(Libro.Titulo!.ToLower());
 
-        if (yaExiste)
+        if (tituloExiste)
         {
             toastService.ShowError("Ya existe un libro registrado con este título.");
             return; 
