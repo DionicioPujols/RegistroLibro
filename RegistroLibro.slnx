@@ -1,6 +1,7 @@
 <Solution>
-  <Project Path="../RegistroLibro.API/RegistroLibro.API.csproj" Id="6d252abf-0143-4909-a2e5-2981480ea403" />
-  <Project Path="../RegistroLibro.DATA/RegistroLibro.DATA.csproj" Id="c0cd76c2-f596-447e-a2dc-226de4fe59a9" />
-  <Project Path="../RegistroLibro.Service/RegistroLibro.Service.csproj" Id="f238a53a-3fab-428b-90e2-9ce567225c09" />
-  <Project Path="RegistroLibro.csproj" />
+  <Project Path="RegistroLibro/RegistroLibro.csproj" />
+  <Project Path="RegistroLibro.API/RegistroLibro.API.csproj" />
+  <Project Path="RegistroLibro.DATA/RegistroLibro.DATA.csproj" />
+  <Project Path="RegistroLibro.Service/RegistroLibro.Service.csproj" />
+  <Project Path="RegistroLibro.Test/RegistroLibro.Test.csproj" />
 </Solution>
