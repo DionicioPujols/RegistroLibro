@@ -1,0 +1,154 @@
+@page "/Entrada/Index"
+
+@inject EntradasService entradasService
+@inject NavigationManager navigationManager
+@inject ToastService toastService
+
+<PageTitle>Registro de Entradas</PageTitle>
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header d-flex justify-content-between align-center mb-4">
+            <h5 class="card-title">Registro de Entradas</h5>
+            <a href="/Entrada/Create" class="btn btn-primary">
+                <span class="bi bi-plus-square mt-3"></span> Crear
+            </a>
+        </div>
+
+        <div class="card-body">
+            @*labels*@
+            <div class="row">
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Filtrar por</strong></label>
+                </div>
+                <div class="col-4">
+                    <label class="col-form-label"><strong>B&uacute;squeda</strong></label>
+                </div>
+            </div>
+
+            @*Inputs y botones*@
+            <div class="row align-items-center">
+                <div class="col-3">
+                    <InputSelect class="form-select" @bind-Value="Filtro">
+                        <option value="" selected disabled>Elija una opci&oacute;n</option>
+                        <option value="Concepto">Concepto</option>
+                        <option value="Fecha">Fecha</option>
+                    </InputSelect>
+                </div>
+
+                <div class="col-4">
+                    <div class="input-group">
+                        <input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
+                        <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+                    </div>
+                </div>
+
+                <div class="col-3">
+                    <button type="button" class="btn btn-outline-secondary bi bi-arrow-counterclockwise"
+                            @onclick="Restablecer">
+                    </button>
+                </div>
+
+                @*FiltroFecha*@
+                <div class="row mt-3">
+                    <div class="col-3">
+                        <label class="col-form-label"><strong>Desde</strong></label>
+                        <InputDate class="form-control" @bind-Value="Desde"></InputDate>
+                    </div>
+
+                    <div class="col-3">
+                        <label class="col-form-label"><strong>Hasta</strong></label>
+                        <div class="input-group">
+                            <InputDate class="form-control" @bind-Value="Hasta"></InputDate>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid">
+                <QuickGrid Items="@entradasQueryable" Class="table table-hover mt-3 table-striped">
+                    <PropertyColumn Property="@(e => e.EntradaId)" Title="EntradaId" Sortable="true" />
+                    <PropertyColumn Property="@(e => e.Fecha)" Title="Fecha" Format="dd/MM/yyyy" Sortable="true" />
+                    <PropertyColumn Property="@(e => e.Concepto)" Title="Concepto" Sortable="true" />
+                    <PropertyColumn Property="@(e => e.Total)" Title="Total Libros" Sortable="true" />
+                    <TemplateColumn Title="Opciones" Align="Align.Center">
+                        <a href="/Entrada/Edit/@context.EntradaId" class="btn btn-outline-primary" title="Editar">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                        <button type="button" class="btn btn-outline-danger ms-1" title="Eliminar"
+                                @onclick="() => Eliminar(context.EntradaId)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </TemplateColumn>
+                </QuickGrid>
+            </div>
+        </div>
+        <div class="card-footer d-flex justify-content-between align-center mb-4">
+            <label class="ms-3"><strong>Cantidad:</strong> @ListaEntradas.Count</label>
+            <div class="col-5">
+                <label class="ms-5"><strong>Total de Libros:</strong> @ListaEntradas.Sum(p => p.Total)</label>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    public List<Entradas> ListaEntradas { get; set; } = new List<Entradas>();
+    IQueryable<Entradas>? entradasQueryable;
+
+    public string Filtro { get; set; } = string.Empty;
+    public string ValorFiltro { get; set; } = string.Empty;
+
+    public DateTime? Desde { get; set; }
+    public DateTime? Hasta { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarEntradas();
+    }
+
+    private async Task CargarEntradas()
+    {
+        ListaEntradas = await entradasService.Listar(e => true);
+        entradasQueryable = ListaEntradas.AsQueryable();
+        Desde = null;
+        Hasta = null;
+    }
+
+    private async Task Buscar()
+    {
+        if (Filtro == "Fecha" && Desde.HasValue && Hasta.HasValue)
+        {
+            ListaEntradas = await entradasService
+                .Listar(f => f.Fecha >= Desde.Value && f.Fecha <= Hasta.Value);
+        }
+        else if (Filtro == "Concepto" && !string.IsNullOrWhiteSpace(ValorFiltro))
+        {
+            ListaEntradas = await entradasService
+                .Listar(p => p.Concepto != null && p.Concepto.ToLower().Contains(ValorFiltro.ToLower()));
+        }
+        else
+        {
+            await CargarEntradas();
+        }
+
+        entradasQueryable = ListaEntradas.AsQueryable();
+    }
+
+    private async Task Restablecer()
+    {
+        await CargarEntradas();
+        Filtro = string.Empty;
+        ValorFiltro = string.Empty;
+    }
+
+    private async Task Eliminar(int entradaId)
+    {
+        var result = await entradasService.Eliminar(entradaId);
+        result.OnSuccess(async () =>
+        {
+            toastService.ShowSuccess("Entrada eliminada correctamente");
+            await CargarEntradas();
+        });
+        result.OnFailure(() => toastService.ShowError("No se pudo eliminar la entrada"));
+    }
+}

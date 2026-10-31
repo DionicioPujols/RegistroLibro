@@ -1,0 +1,43 @@
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Sistemas de registros</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column">
+        
+        <div class="nav-item px-3">
+             <NavLink class="nav-link" href="Libro/Index" Match="NavLinkMatch.All">
+             <i class="bi bi-book fs-5 me-2"></i> Libros
+        </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+             <NavLink class="nav-link" href="Estudiante/Index" Match="NavLinkMatch.All">
+             <i class="bi bi-people fs-5 me-2"></i> Estudiante
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+             <NavLink class="nav-link" href="Prestamo/Index" Match="NavLinkMatch.All">
+                <i class="bi bi-journal-text fs-5 me-2"></i> Préstamos
+             </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+             <NavLink class="nav-link" href="Devolucion/Index" Match="NavLinkMatch.All">
+                <i class="bi bi-arrow-return-left fs-5 me-2"></i> Devoluciones
+             </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+             <NavLink class="nav-link" href="Entrada/Index" Match="NavLinkMatch.All">
+                <i class="bi bi-box-arrow-in-down fs-5 me-2"></i> Entradas
+             </NavLink>
+        </div>
+
+    </nav>
+</div>

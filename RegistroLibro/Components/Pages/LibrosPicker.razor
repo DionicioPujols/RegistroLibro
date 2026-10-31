@@ -1,0 +1,60 @@
+@using RegistroLibro.Models
+
+<div class="col-auto input-group align-items-center">
+    <label class="col-form-label input-group-text">Seleccione:</label>
+
+    <InputSelect class="form-control form-select" @bind-Value="LibroId">
+        <option disabled value="0">-- Seleccione un libro --</option>
+        @foreach (var libro in Libros)
+        {
+            <option value="@libro.LibroId">@libro.LibroId - @libro.Titulo (Disponibles: @libro.CantidadDisponible)</option>
+        }
+    </InputSelect>
+    <label class="col-form-label input-group-text">Cantidad:</label>
+    <InputNumber class="form-control" id="quantity-input" @bind-Value="Cantidad" min="1" />
+
+    <button type="button" class="btn btn-outline-success bi bi-plus" @onclick="TriggerSelection">Agregar</button>
+</div>
+@if (ErrorMessage != null)
+{
+    <div class="alert alert-danger mt-2" role="alert">
+        @ErrorMessage
+    </div>
+}
+
+@code {
+    [Parameter]
+    public List<Libros> Libros { get; set; } = [];
+
+    [Parameter]
+    public int LibroId { get; set; }
+
+    [Parameter]
+    public int Cantidad { get; set; } = 1;
+
+    [Parameter]
+    public EventCallback<(Libros Libro, int Cantidad)> OnLibroSelected { get; set; }
+
+    private string? ErrorMessage { get; set; } = null;
+
+    private async Task TriggerSelection()
+    {
+        ErrorMessage = null;
+        if (LibroId > 0 && Cantidad > 0)
+        {
+            var libroSeleccionado = Libros.SingleOrDefault(l => l.LibroId == LibroId);
+
+            if (libroSeleccionado == null)
+            {
+                ErrorMessage = "El libro seleccionado no es válido";
+                return;
+            }
+
+            await OnLibroSelected.InvokeAsync((libroSeleccionado, Cantidad));
+        }
+        else
+        {
+            ErrorMessage = "Debe seleccionar un libro y colocar una cantidad válida";
+        }
+    }
+}
