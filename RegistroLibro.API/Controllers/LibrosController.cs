@@ -13,15 +13,15 @@ public class LibrosController(Contexto contexto) : ControllerBase
 {
     // GET: api/libros
     [HttpGet]
-    public async Task<ActionResult<List<LibroDto>>> GetLibros()
+    public async Task<ActionResult<List<LibroDto>>> Get()
     {
         var libros = await contexto.Libros.AsNoTracking().ToListAsync();
         return Ok(libros.Adapt<List<LibroDto>>());
     }
 
     // GET: api/libros/5
-    [HttpGet("{id}")]
-    public async Task<ActionResult<LibroDto>> GetLibro(int id)
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<LibroDto>> GetById(int id)
     {
         var libro = await contexto.Libros.FindAsync(id);
 
@@ -35,13 +35,8 @@ public class LibrosController(Contexto contexto) : ControllerBase
 
     // POST: api/libros
     [HttpPost]
-    public async Task<ActionResult<LibroDto>> PostLibro(Libro libro)
+    public async Task<ActionResult<LibroDto>> Post([FromBody] Libro libro)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
         contexto.Libros.Add(libro);
         await contexto.SaveChangesAsync();
 
@@ -49,21 +44,15 @@ public class LibrosController(Contexto contexto) : ControllerBase
     }
 
     // PUT: api/libros/5
-    [HttpPut("{id}")]
-    public async Task<IActionResult> PutLibro(int id, Libro libro)
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Put(int id, [FromBody] Libro libro)
     {
         if (id != libro.LibroId)
         {
-            return BadRequest("El ID de la ruta no coincide con el ID del libro.");
+            return BadRequest();
         }
 
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
-        var libroExiste = await contexto.Libros.AnyAsync(l => l.LibroId == id);
-        if (!libroExiste)
+        if (!await contexto.Libros.AnyAsync(l => l.LibroId == id))
         {
             return NotFound();
         }
@@ -75,18 +64,18 @@ public class LibrosController(Contexto contexto) : ControllerBase
     }
 
     // DELETE: api/libros/5
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteLibro(int id)
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id)
     {
         var libro = await contexto.Libros.FindAsync(id);
+
         if (libro == null)
         {
             return NotFound();
         }
 
-        var tienePrestamos = await contexto.Prestamos.AnyAsync(p => p.LibroId == id);
-        var tieneEntradas = await contexto.EntradasDetalles.AnyAsync(e => e.LibroId == id);
-        if (tienePrestamos || tieneEntradas)
+        if (await contexto.Prestamos.AnyAsync(p => p.LibroId == id) ||
+            await contexto.EntradasDetalles.AnyAsync(e => e.LibroId == id))
         {
             return Conflict("No se puede eliminar el libro porque tiene préstamos o entradas asociados.");
         }
