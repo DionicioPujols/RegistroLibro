@@ -12,7 +12,9 @@ var connectionString = builder.Configuration.GetConnectionString("SqlConStr");
 builder.Services.AddDbContextFactory<Contexto>(options =>
     options.UseSqlServer(connectionString));
 
-builder.Services.AddScoped<EstudianteService>();
+builder.Services.AddTransient<EstudianteService>();
+builder.Services.AddTransient<LibrosService>();
+builder.Services.AddTransient<PrestamosService>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
