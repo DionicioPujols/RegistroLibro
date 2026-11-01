@@ -1,5 +1,7 @@
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using RegistroLibro.API.DTOs;
 using RegistroLibro.DATA.Context;
 using RegistroLibro.DATA.Models;
 
@@ -11,14 +13,15 @@ public class LibrosController(Contexto contexto) : ControllerBase
 {
     // GET: api/libros
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Libro>>> GetLibros()
+    public async Task<ActionResult<List<LibroDto>>> GetLibros()
     {
-        return Ok(await contexto.Libros.AsNoTracking().ToListAsync());
+        var libros = await contexto.Libros.AsNoTracking().ToListAsync();
+        return Ok(libros.Adapt<List<LibroDto>>());
     }
 
     // GET: api/libros/5
     [HttpGet("{id}")]
-    public async Task<ActionResult<Libro>> GetLibro(int id)
+    public async Task<ActionResult<LibroDto>> GetLibro(int id)
     {
         var libro = await contexto.Libros.FindAsync(id);
 
@@ -27,12 +30,12 @@ public class LibrosController(Contexto contexto) : ControllerBase
             return NotFound();
         }
 
-        return Ok(libro);
+        return Ok(libro.Adapt<LibroDto>());
     }
 
     // POST: api/libros
     [HttpPost]
-    public async Task<ActionResult<Libro>> PostLibro(Libro libro)
+    public async Task<ActionResult<LibroDto>> PostLibro(Libro libro)
     {
         if (!ModelState.IsValid)
         {
@@ -42,7 +45,7 @@ public class LibrosController(Contexto contexto) : ControllerBase
         contexto.Libros.Add(libro);
         await contexto.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetLibro), new { id = libro.LibroId }, libro);
+        return Ok(libro.Adapt<LibroDto>());
     }
 
     // PUT: api/libros/5
