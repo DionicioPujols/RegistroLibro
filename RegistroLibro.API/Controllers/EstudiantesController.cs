@@ -1,4 +1,6 @@
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
+using RegistroLibro.API.DTOs;
 using RegistroLibro.DATA.Models;
 using RegistroLibro.Service.Services;
 
@@ -17,15 +19,15 @@ public class EstudiantesController : ControllerBase
 
     // GET: api/estudiantes
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Estudiante>>> GetEstudiantes()
+    public async Task<ActionResult<List<EstudianteDto>>> GetEstudiantes()
     {
         var result = await _estudianteService.GetList(e => true);
-        return Ok(result.Value);
+        return Ok(result.Value.Adapt<List<EstudianteDto>>());
     }
 
     // GET: api/estudiantes/5
     [HttpGet("{id}")]
-    public async Task<ActionResult<Estudiante>> GetEstudiante(int id)
+    public async Task<ActionResult<EstudianteDto>> GetEstudiante(int id)
     {
         var result = await _estudianteService.Buscar(id);
 
@@ -34,12 +36,12 @@ public class EstudiantesController : ControllerBase
             return NotFound();
         }
 
-        return Ok(result.Value);
+        return Ok(result.Value.Adapt<EstudianteDto>());
     }
 
     // POST: api/estudiantes
     [HttpPost]
-    public async Task<ActionResult<Estudiante>> PostEstudiante(Estudiante estudiante)
+    public async Task<ActionResult<EstudianteDto>> PostEstudiante(Estudiante estudiante)
     {
         if (!ModelState.IsValid)
         {
@@ -52,7 +54,7 @@ public class EstudiantesController : ControllerBase
             return BadRequest("No se pudo guardar el estudiante.");
         }
 
-        return CreatedAtAction(nameof(GetEstudiante), new { id = estudiante.EstudianteId }, estudiante);
+        return Ok(estudiante.Adapt<EstudianteDto>());
     }
 
     // PUT: api/estudiantes/5
