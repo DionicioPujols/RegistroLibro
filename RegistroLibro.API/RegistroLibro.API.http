@@ -38,3 +38,87 @@ Content-Type: application/json
 DELETE {{RegistroLibro.API_HostAddress}}/api/estudiantes/1
 
 ###
+
+# LIBROS
+
+GET {{RegistroLibro.API_HostAddress}}/api/libros
+Accept: application/json
+
+###
+
+GET {{RegistroLibro.API_HostAddress}}/api/libros/1
+Accept: application/json
+
+###
+
+POST {{RegistroLibro.API_HostAddress}}/api/libros
+Content-Type: application/json
+
+{
+  "titulo": "Cien años de soledad",
+  "autor": "Gabriel García Márquez",
+  "anoPublicacion": 1967,
+  "cantidadPrestamos": 0,
+  "cantidadDisponible": 5
+}
+
+###
+
+PUT {{RegistroLibro.API_HostAddress}}/api/libros/1
+Content-Type: application/json
+
+{
+  "libroId": 1,
+  "titulo": "Cien años de soledad",
+  "autor": "Gabriel García Márquez",
+  "anoPublicacion": 1967,
+  "cantidadPrestamos": 1,
+  "cantidadDisponible": 4
+}
+
+###
+
+DELETE {{RegistroLibro.API_HostAddress}}/api/libros/1
+
+###
+
+# PRÉSTAMOS
+
+GET {{RegistroLibro.API_HostAddress}}/api/prestamos
+Accept: application/json
+
+###
+
+GET {{RegistroLibro.API_HostAddress}}/api/prestamos/1
+Accept: application/json
+
+###
+
+POST {{RegistroLibro.API_HostAddress}}/api/prestamos
+Content-Type: application/json
+
+{
+  "fecha": "2026-11-01T00:00:00",
+  "estudianteId": 1,
+  "libroId": 1,
+  "devuelto": false
+}
+
+###
+
+PUT {{RegistroLibro.API_HostAddress}}/api/prestamos/1
+Content-Type: application/json
+
+{
+  "prestamoId": 1,
+  "fecha": "2026-11-01T00:00:00",
+  "estudianteId": 1,
+  "libroId": 1,
+  "devuelto": true
+}
+
+###
+
+DELETE {{RegistroLibro.API_HostAddress}}/api/prestamos/1
+
+###
