@@ -15,11 +15,8 @@ public class PrestamosController(Contexto contexto) : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<PrestamoDto>>> Get()
     {
-        var prestamos = await contexto.Prestamos
-            .AsNoTracking()
-            .ToListAsync();
-
-        return Ok(prestamos.Adapt<List<PrestamoDto>>());
+        var result = await contexto.Prestamos.ToListAsync();
+        return Ok(result.Adapt<List<PrestamoDto>>());
     }
 
     // GET: api/prestamos/5
