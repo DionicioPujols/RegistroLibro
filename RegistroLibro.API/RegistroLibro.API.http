@@ -1,0 +1,40 @@
+@RegistroLibro.API_HostAddress = http://localhost:5225
+
+GET {{RegistroLibro.API_HostAddress}}/api/estudiantes
+Accept: application/json
+
+###
+
+GET {{RegistroLibro.API_HostAddress}}/api/estudiantes/1
+Accept: application/json
+
+###
+
+POST {{RegistroLibro.API_HostAddress}}/api/estudiantes
+Content-Type: application/json
+
+{
+  "nombre": "Juan Perez",
+  "direccion": "Calle Central #12",
+  "correo": "juan.perez@example.com",
+  "fechaNacimeinto": "2000-01-01T00:00:00"
+}
+
+###
+
+PUT {{RegistroLibro.API_HostAddress}}/api/estudiantes/1
+Content-Type: application/json
+
+{
+  "estudianteId": 1,
+  "nombre": "Dionicio Hdez. Pujols",
+  "direccion": "Teresa Paulino",
+  "correo": "asfhdfj@qwert.com",
+  "fechaNacimeinto": "2006-05-10T00:00:00"
+}
+
+###
+
+DELETE {{RegistroLibro.API_HostAddress}}/api/estudiantes/1
+
+###

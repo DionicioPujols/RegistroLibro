@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aplicada1.Core" Version="1.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.13" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.12" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.18.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RegistroLibro.DATA\RegistroLibro.DATA.csproj" />
+    <ProjectReference Include="..\RegistroLibro.Service\RegistroLibro.Service.csproj" />
+  </ItemGroup>
+
+</Project>
