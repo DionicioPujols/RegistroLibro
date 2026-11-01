@@ -15,8 +15,8 @@ public class LibrosController(Contexto contexto) : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<LibroDto>>> Get()
     {
-        var libros = await contexto.Libros.AsNoTracking().ToListAsync();
-        return Ok(libros.Adapt<List<LibroDto>>());
+        var result = await contexto.Libros.ToListAsync();
+        return Ok(result.Adapt<List<LibroDto>>());
     }
 
     // GET: api/libros/5
@@ -52,12 +52,17 @@ public class LibrosController(Contexto contexto) : ControllerBase
             return BadRequest();
         }
 
-        if (!await contexto.Libros.AnyAsync(l => l.LibroId == id))
+        var libroActual = await contexto.Libros.FindAsync(id);
+        if (libroActual == null)
         {
             return NotFound();
         }
 
-        contexto.Entry(libro).State = EntityState.Modified;
+        libroActual.Titulo = libro.Titulo;
+        libroActual.Autor = libro.Autor;
+        libroActual.AnoPublicacion = libro.AnoPublicacion;
+        libroActual.CantidadPrestamos = libro.CantidadPrestamos;
+        libroActual.CantidadDisponible = libro.CantidadDisponible;
         await contexto.SaveChangesAsync();
 
         return NoContent();
@@ -74,8 +79,10 @@ public class LibrosController(Contexto contexto) : ControllerBase
             return NotFound();
         }
 
-        if (await contexto.Prestamos.AnyAsync(p => p.LibroId == id) ||
-            await contexto.EntradasDetalles.AnyAsync(e => e.LibroId == id))
+        var tienePrestamos = await contexto.Prestamos.AnyAsync(p => p.LibroId == id);
+        var tieneEntradas = await contexto.EntradasDetalles.AnyAsync(e => e.LibroId == id);
+
+        if (tienePrestamos || tieneEntradas)
         {
             return Conflict("No se puede eliminar el libro porque tiene préstamos o entradas asociados.");
         }
