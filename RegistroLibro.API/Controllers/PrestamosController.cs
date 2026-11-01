@@ -1,5 +1,7 @@
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using RegistroLibro.API.DTOs;
 using RegistroLibro.DATA.Context;
 using RegistroLibro.DATA.Models;
 
@@ -11,7 +13,7 @@ public class PrestamosController(Contexto contexto) : ControllerBase
 {
     // GET: api/prestamos
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Prestamo>>> GetPrestamos()
+    public async Task<ActionResult<List<PrestamoDto>>> GetPrestamos()
     {
         var prestamos = await contexto.Prestamos
             .Include(p => p.Estudiante)
@@ -19,12 +21,12 @@ public class PrestamosController(Contexto contexto) : ControllerBase
             .AsNoTracking()
             .ToListAsync();
 
-        return Ok(prestamos);
+        return Ok(prestamos.Adapt<List<PrestamoDto>>());
     }
 
     // GET: api/prestamos/5
     [HttpGet("{id}")]
-    public async Task<ActionResult<Prestamo>> GetPrestamo(int id)
+    public async Task<ActionResult<PrestamoDto>> GetPrestamo(int id)
     {
         var prestamo = await contexto.Prestamos
             .Include(p => p.Estudiante)
@@ -37,12 +39,12 @@ public class PrestamosController(Contexto contexto) : ControllerBase
             return NotFound();
         }
 
-        return Ok(prestamo);
+        return Ok(prestamo.Adapt<PrestamoDto>());
     }
 
     // POST: api/prestamos
     [HttpPost]
-    public async Task<ActionResult<Prestamo>> PostPrestamo(Prestamo prestamo)
+    public async Task<ActionResult<PrestamoDto>> PostPrestamo(Prestamo prestamo)
     {
         if (!ModelState.IsValid)
         {
@@ -62,7 +64,7 @@ public class PrestamosController(Contexto contexto) : ControllerBase
         contexto.Prestamos.Add(prestamo);
         await contexto.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetPrestamo), new { id = prestamo.PrestamoId }, prestamo);
+        return Ok(prestamo.Adapt<PrestamoDto>());
     }
 
     // PUT: api/prestamos/5
