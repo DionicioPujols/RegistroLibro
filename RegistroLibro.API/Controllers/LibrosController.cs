@@ -1,45 +1,42 @@
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using RegistroLibro.API.DTOs;
-using RegistroLibro.DATA.Context;
 using RegistroLibro.DATA.Models;
+using RegistroLibro.Service.Services;
 
 namespace RegistroLibro.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class LibrosController(Contexto contexto) : ControllerBase
+public class LibrosController(LibrosService librosService) : ControllerBase
 {
     // GET: api/libros
     [HttpGet]
     public async Task<ActionResult<List<LibroDto>>> Get()
     {
-        var result = await contexto.Libros.ToListAsync();
-        return Ok(result.Adapt<List<LibroDto>>());
+        var result = await librosService.GetList(l => l.LibroId > 0);
+        return Ok(result.Value.Adapt<List<LibroDto>>());
     }
 
     // GET: api/libros/5
     [HttpGet("{id:int}")]
     public async Task<ActionResult<LibroDto>> GetById(int id)
     {
-        var libro = await contexto.Libros.FindAsync(id);
+        var result = await librosService.Buscar(id);
 
-        if (libro == null)
+        if (result.Value == null)
         {
             return NotFound();
         }
 
-        return Ok(libro.Adapt<LibroDto>());
+        return Ok(result.Value.Adapt<LibroDto>());
     }
 
     // POST: api/libros
     [HttpPost]
     public async Task<ActionResult<LibroDto>> Post([FromBody] Libro libro)
     {
-        contexto.Libros.Add(libro);
-        await contexto.SaveChangesAsync();
-
+        await librosService.Guardar(libro);
         return Ok(libro.Adapt<LibroDto>());
     }
 
@@ -52,19 +49,13 @@ public class LibrosController(Contexto contexto) : ControllerBase
             return BadRequest();
         }
 
-        var libroActual = await contexto.Libros.FindAsync(id);
-        if (libroActual == null)
+        var libroActual = await librosService.Buscar(id);
+        if (libroActual.Value == null)
         {
             return NotFound();
         }
 
-        libroActual.Titulo = libro.Titulo;
-        libroActual.Autor = libro.Autor;
-        libroActual.AnoPublicacion = libro.AnoPublicacion;
-        libroActual.CantidadPrestamos = libro.CantidadPrestamos;
-        libroActual.CantidadDisponible = libro.CantidadDisponible;
-        await contexto.SaveChangesAsync();
-
+        await librosService.Guardar(libro);
         return NoContent();
     }
 
@@ -72,23 +63,18 @@ public class LibrosController(Contexto contexto) : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var libro = await contexto.Libros.FindAsync(id);
-
-        if (libro == null)
+        var libro = await librosService.Buscar(id);
+        if (libro.Value == null)
         {
             return NotFound();
         }
 
-        var tienePrestamos = await contexto.Prestamos.AnyAsync(p => p.LibroId == id);
-        var tieneEntradas = await contexto.EntradasDetalles.AnyAsync(e => e.LibroId == id);
-
-        if (tienePrestamos || tieneEntradas)
+        var resultado = await librosService.Eliminar(id);
+        var eliminacion = (Aplicada1.Core.Result<bool>)resultado;
+        if (!eliminacion.Value)
         {
             return Conflict("No se puede eliminar el libro porque tiene préstamos o entradas asociados.");
         }
-
-        contexto.Libros.Remove(libro);
-        await contexto.SaveChangesAsync();
 
         return NoContent();
     }
