@@ -1,51 +1,42 @@
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using RegistroLibro.API.DTOs;
-using RegistroLibro.DATA.Context;
 using RegistroLibro.DATA.Models;
+using RegistroLibro.Service.Services;
 
 namespace RegistroLibro.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class PrestamosController(Contexto contexto) : ControllerBase
+public class PrestamosController(PrestamosService prestamosService) : ControllerBase
 {
     // GET: api/prestamos
     [HttpGet]
     public async Task<ActionResult<List<PrestamoDto>>> Get()
     {
-        var result = await contexto.Prestamos.ToListAsync();
-        return Ok(result.Adapt<List<PrestamoDto>>());
+        var result = await prestamosService.GetList(p => p.PrestamoId > 0);
+        return Ok(result.Value.Adapt<List<PrestamoDto>>());
     }
 
     // GET: api/prestamos/5
     [HttpGet("{id:int}")]
     public async Task<ActionResult<PrestamoDto>> GetById(int id)
     {
-        var prestamo = await contexto.Prestamos.FindAsync(id);
+        var result = await prestamosService.Buscar(id);
 
-        if (prestamo == null)
+        if (result.Value == null)
         {
             return NotFound();
         }
 
-        return Ok(prestamo.Adapt<PrestamoDto>());
+        return Ok(result.Value.Adapt<PrestamoDto>());
     }
 
     // POST: api/prestamos
     [HttpPost]
     public async Task<ActionResult<PrestamoDto>> Post([FromBody] Prestamo prestamo)
     {
-        if (!await contexto.Estudiantes.AnyAsync(e => e.EstudianteId == prestamo.EstudianteId) ||
-            !await contexto.Libros.AnyAsync(l => l.LibroId == prestamo.LibroId))
-        {
-            return BadRequest("El estudiante o el libro indicado no existe.");
-        }
-
-        contexto.Prestamos.Add(prestamo);
-        await contexto.SaveChangesAsync();
-
+        await prestamosService.Guardar(prestamo);
         return Ok(prestamo.Adapt<PrestamoDto>());
     }
 
@@ -58,24 +49,13 @@ public class PrestamosController(Contexto contexto) : ControllerBase
             return BadRequest();
         }
 
-        var prestamoActual = await contexto.Prestamos.FindAsync(id);
-        if (prestamoActual == null)
+        var prestamoActual = await prestamosService.Buscar(id);
+        if (prestamoActual.Value == null)
         {
             return NotFound();
         }
 
-        if (!await contexto.Estudiantes.AnyAsync(e => e.EstudianteId == prestamo.EstudianteId) ||
-            !await contexto.Libros.AnyAsync(l => l.LibroId == prestamo.LibroId))
-        {
-            return BadRequest("El estudiante o el libro indicado no existe.");
-        }
-
-        prestamoActual.Fecha = prestamo.Fecha;
-        prestamoActual.EstudianteId = prestamo.EstudianteId;
-        prestamoActual.LibroId = prestamo.LibroId;
-        prestamoActual.Devuelto = prestamo.Devuelto;
-
-        await contexto.SaveChangesAsync();
+        await prestamosService.Guardar(prestamo);
         return NoContent();
     }
 
@@ -83,20 +63,18 @@ public class PrestamosController(Contexto contexto) : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var prestamo = await contexto.Prestamos.FindAsync(id);
-
-        if (prestamo == null)
+        var prestamo = await prestamosService.Buscar(id);
+        if (prestamo.Value == null)
         {
             return NotFound();
         }
 
-        if (await contexto.Devoluciones.AnyAsync(d => d.PrestamoId == id))
+        var resultado = await prestamosService.Eliminar(id);
+        var eliminacion = (Aplicada1.Core.Result<bool>)resultado;
+        if (!eliminacion.Value)
         {
             return Conflict("No se puede eliminar el préstamo porque tiene devoluciones asociadas.");
         }
-
-        contexto.Prestamos.Remove(prestamo);
-        await contexto.SaveChangesAsync();
 
         return NoContent();
     }
