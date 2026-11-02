@@ -17,7 +17,7 @@ public partial class Prestamo
 
     public virtual ICollection<Devolucione> Devoluciones { get; set; } = new List<Devolucione>();
 
-    public virtual Estudiante Estudiante { get; set; } = null!;
+    public virtual Estudiante? Estudiante { get; set; }
 
-    public virtual Libro Libro { get; set; } = null!;
+    public virtual Libro? Libro { get; set; }
 }

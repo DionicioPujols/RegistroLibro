@@ -12,7 +12,9 @@ var connectionString = builder.Configuration.GetConnectionString("SqlConStr");
 builder.Services.AddDbContextFactory<Contexto>(options =>
     options.UseSqlServer(connectionString));
 
-builder.Services.AddScoped<EstudianteService>();
+builder.Services.AddTransient<EstudianteService>();
+builder.Services.AddTransient<LibrosService>();
+builder.Services.AddTransient<PrestamosService>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -26,7 +28,7 @@ builder.Services.AddOpenApi();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
